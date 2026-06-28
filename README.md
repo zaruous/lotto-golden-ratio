@@ -61,6 +61,14 @@
 
 ---
 
+## 📚 설정 및 배포 가이드
+
+* [Telegram Bot 및 Cloudflare Worker 설정 가이드](docs/telegram-bot-setup.md) — BotFather 토큰 발급, Worker 배포, 웹훅 연결, GitHub Actions 자동 발송 설정
+* [텔레그램봇 배포하기](docs/%ED%85%94%EB%A0%88%EA%B7%B8%EB%9E%A8%EB%B4%87%20%EB%B0%B0%ED%8F%AC%ED%95%98%EA%B8%B0.md) — 최초 배포, 코드 재배포, 웹훅 및 명령 테스트 절차
+* [GitHub Pages 연동 및 배포 가이드](docs/github-pages-deployment.md) — 인증 토큰 발급, Pages 활성화, 브랜치/Actions 배포, 문제 해결
+
+---
+
 ## 🚀 로컬 실행 방법
 
 1. 저장소를 클론(Clone)하거나 Zip 파일로 내려받습니다.

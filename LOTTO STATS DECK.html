@@ -1215,6 +1215,29 @@
 
         let currentGridFilter = 'all';
 
+        function getNumbersFromUrl() {
+            const raw = new URLSearchParams(window.location.search).get('numbers');
+            if (!raw) return null;
+
+            const numbers = raw.split(',').map(value => Number(value.trim()));
+            const isValid = numbers.length === 6 &&
+                numbers.every(Number.isInteger) &&
+                numbers.every(num => num >= 1 && num <= 45) &&
+                new Set(numbers).size === 6;
+
+            return isValid ? numbers.sort((a, b) => a - b) : null;
+        }
+
+        function applyNumbersFromUrl() {
+            const urlNumbers = getNumbersFromUrl();
+            if (!urlNumbers) return false;
+
+            selectedNumbers = urlNumbers;
+            updateUI();
+            showNotification(`텔레그램 추천 번호 ${urlNumbers.join(', ')}를 적용했습니다.`);
+            return true;
+        }
+
         function setGridFilter(type) {
             currentGridFilter = type;
             
@@ -1727,6 +1750,7 @@
         // Start Board Init
         window.onload = () => {
             initBoard();
+            applyNumbersFromUrl();
             loadLatestDrawNumbers();
         };
 

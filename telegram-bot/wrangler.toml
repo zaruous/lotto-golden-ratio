@@ -1,0 +1,9 @@
+﻿name = "lotto-smart-bot"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# 환경 변수는 wrangler secret put 명령어로 등록합니다
+# TELEGRAM_BOT_TOKEN → 아래 명령어로 등록:
+# npx wrangler secret put TELEGRAM_BOT_TOKEN
