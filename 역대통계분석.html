@@ -449,18 +449,19 @@
 
         .table-responsive {
             width: 100%;
-            overflow-x: auto;
+            overflow-x: hidden;
         }
 
         table {
             width: 100%;
+            table-layout: auto;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.9rem;
+            font-size: 0.78rem;
         }
 
         th, td {
-            padding: 14px 18px;
+            padding: 12px 6px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             white-space: nowrap;
         }
@@ -469,9 +470,9 @@
             background: rgba(15, 23, 42, 0.4);
             color: #fff;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.74rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.15px;
         }
 
         tr:hover td {
@@ -482,18 +483,18 @@
         .balls-cell {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
         }
 
         .table-ball {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 0.72rem;
             color: #fff;
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
             box-shadow: 
@@ -511,6 +512,33 @@
         .table-ball.bonus-ball {
             border: 2px solid #fff;
             animation: pulseBonus 2.5s infinite;
+        }
+
+        .winner-count {
+            text-align: center;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        @media (min-width: 769px) and (max-width: 1100px) {
+            th, td {
+                padding-left: 4px;
+                padding-right: 4px;
+            }
+
+            table {
+                font-size: 0.72rem;
+            }
+
+            th {
+                font-size: 0.68rem;
+            }
+
+            .table-ball {
+                width: 21px;
+                height: 21px;
+                font-size: 0.65rem;
+            }
         }
 
         @keyframes pulseBonus {
@@ -747,6 +775,10 @@
             }
 
             /* Table Column Optimizer for Mobile screens */
+            .winner-count-column {
+                display: none !important;
+            }
+
             table th:nth-child(2), table td:nth-child(2), /* 추첨일 */
             table th:nth-child(4), table td:nth-child(4), /* 총합 */
             table th:nth-child(5), table td:nth-child(5), /* AC */
@@ -901,8 +933,9 @@
                             <th>고저<span class="tooltip-icon" data-tooltip="1~22를 저수, 23~45를 고수로 분류한 비율입니다. 홀짝과 마찬가지로 3:3, 2:4, 4:2 균형 조합이 통계적으로 매우 안정적입니다.">ⓘ</span></th>
                             <th>소수<span class="tooltip-icon" data-tooltip="1부터 45 사이의 소수(2, 3, 5, 7, 11... 등 총 14개)가 조합에 포함된 개수입니다. 통계적으로 1~3개 포함되는 조합이 약 80% 이상을 차지합니다.">ⓘ</span></th>
                             <th>3분할<span class="tooltip-icon" data-tooltip="1~45 범위를 3개 구간(1~15, 16~30, 31~45)으로 나눴을 때의 분포입니다. 특정 구간에만 치우쳐 번호가 쏠리지 않고 고루 분포(구간당 최대 4개 이하)되는 조합이 안정적입니다.">ⓘ</span></th>
-                            <th>점수</th>
-                            <th>조화 등급</th>
+                            <th>점수<span class="tooltip-icon" data-tooltip="총합, AC 복잡도, 홀짝, 고저, 소수, 3분할 조건의 통과 여부를 가중치로 합산한 100점 만점의 통계적 균형 점수입니다. 당첨 확률이나 당첨을 보장하는 수치가 아닙니다.">ⓘ</span></th>
+                            <th>조화 등급<span class="tooltip-icon" data-tooltip="통계 점수를 기준으로 황금조화(90점 이상), 우수(70점 이상), 보통(50점 이상), 불균형(50점 미만)으로 분류합니다.">ⓘ</span></th>
+                            <th class="winner-count-column">1등 당첨게임<span class="tooltip-icon" data-tooltip="해당 회차의 1등 당첨 게임 수입니다. 한 사람이 여러 게임에 당첨될 수 있으므로 실제 당첨자 수와는 다를 수 있습니다.">ⓘ</span></th>
                         </tr>
                     </thead>
                     <tbody id="table-body">
@@ -1089,6 +1122,7 @@
                     date: row['추첨일'] || '',
                     numbers: nums,
                     bonus: bonus,
+                    winners1st: parseWinnerCount(row['1등당첨인원']),
                     ...stats
                 });
             });
@@ -1296,6 +1330,16 @@
             return 'num-41-45';
         }
 
+        function parseWinnerCount(value) {
+            if (value === null || value === undefined || value === '') return null;
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+
+        function formatWinnerCount(value) {
+            return value === null ? '-' : `${value.toLocaleString('ko-KR')}게임`;
+        }
+
         // Render Page Table
         function renderTable() {
             const tbody = document.getElementById('table-body');
@@ -1304,7 +1348,7 @@
             const total = filteredRecords.length;
             
             if (total === 0) {
-                tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; color: var(--text-muted); padding: 40px 0;">조건에 부합하는 분석 데이터가 없습니다.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; color: var(--text-muted); padding: 40px 0;">조건에 부합하는 분석 데이터가 없습니다.</td></tr>`;
                 document.getElementById('pagination-info').textContent = '0 - 0 of 0';
                 document.getElementById('btn-prev').disabled = true;
                 document.getElementById('btn-next').disabled = true;
@@ -1355,6 +1399,7 @@
                     <td>${divBadge}</td>
                     <td style="font-weight: 800; color: #fff;">${r.score}점</td>
                     <td class="grade-text ${gradeClass}">${r.grade}</td>
+                    <td class="winner-count winner-count-column">${formatWinnerCount(r.winners1st)}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1418,7 +1463,7 @@
                             '보너스': String(row.bonus),
                             '총판매금액': String(row.sales_amt),
                             '1등당첨금액': String(row.prize_1st),
-                            '1등당첨인원': String(row.winners_1st)
+                            '1등당첨인원': row.winners_1st == null ? '' : String(row.winners_1st)
                         }));
                         console.log(`Supabase 로드 성공: 총 ${originalRecords.length}개 회차`);
                         processRecords(originalRecords);
