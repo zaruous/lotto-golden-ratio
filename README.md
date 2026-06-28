@@ -12,7 +12,7 @@
 
 ## 📸 플랫폼 프리뷰 (Preview)
 
-![로또 황금비율 플랫폼 대시보드 미리보기](lotto_dashboard_preview.png)
+![로또 황금비율 플랫폼 대시보드 미리보기](lotto_dashboard_screenshot.png)
 
 ---
 
