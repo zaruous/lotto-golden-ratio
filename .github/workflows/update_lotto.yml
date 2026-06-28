@@ -2,7 +2,11 @@ name: Weekly Lotto Auto Update
 
 on:
   schedule:
-    # 매주 일요일 한국 시간(KST) 오전 8:00에 실행 (UTC 토요일 23:00)
+    # 1. 매주 토요일 저녁 9:00 (KST) -> UTC 토요일 12:00
+    - cron: '0 12 * * 6'
+    # 2. 매주 토요일 저녁 9:10 (KST) -> UTC 토요일 12:10
+    - cron: '10 12 * * 6'
+    # 3. 매주 일요일 아침 8:00 (KST) -> UTC 토요일 23:00
     - cron: '0 23 * * 6'
   workflow_dispatch: # 수동으로 즉시 갱신을 실행할 수 있는 버튼을 깃허브 웹에 활성화
 
