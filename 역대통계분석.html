@@ -671,6 +671,7 @@
             box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
         }
     </style>
+    <script src="supabase_config.js"></script>
 </head>
 <body>
 
@@ -1276,6 +1277,51 @@
 
         // Auto Load or Dropzone initialization
         function initLoader() {
+            // 1. Supabase에서 먼저 조회를 시도
+            if (typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+                console.log("Supabase 데이터베이스에서 데이터를 조회합니다...");
+                fetch(`${SUPABASE_CONFIG.url}/rest/v1/lotto_history?select=*&order=round.asc`, {
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.anonKey,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error("Supabase 응답 실패");
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.length > 0) {
+                        originalRecords = data.map(row => ({
+                            '회차': String(row.round),
+                            '추첨일': row.draw_date,
+                            '번호1': String(row.num1),
+                            '번호2': String(row.num2),
+                            '번호3': String(row.num3),
+                            '번호4': String(row.num4),
+                            '번호5': String(row.num5),
+                            '번호6': String(row.num6),
+                            '보너스': String(row.bonus),
+                            '총판매금액': String(row.sales_amt),
+                            '1등당첨금액': String(row.prize_1st),
+                            '1등당첨인원': String(row.winners_1st)
+                        }));
+                        console.log(`Supabase 로드 성공: 총 ${originalRecords.length}개 회차`);
+                        processRecords(originalRecords);
+                    } else {
+                        throw new Error("DB 데이터가 비어 있습니다.");
+                    }
+                })
+                .catch(err => {
+                    console.warn("Supabase 로드 실패, CSV 파일 폴백 실행:", err.message);
+                    loadCsvFallback();
+                });
+            } else {
+                loadCsvFallback();
+            }
+        }
+
+        function loadCsvFallback() {
             // Try fetching automatically
             fetch('lotto_history.csv')
                 .then(response => {
