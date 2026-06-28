@@ -832,6 +832,7 @@
                 <a href="LOTTO STATS DECK.html" class="nav-link">실시간 분석 및 스마트 생성기</a>
                 <a href="역대통계분석.html" class="nav-link active">역대 전체 대시보드</a>
                 <a href="회차별상세분석.html" class="nav-link">회차별 상세 분석</a>
+                <a href="히트맵분석.html" class="nav-link">히트맵 분석</a>
             </div>
         </nav>
 
@@ -1102,6 +1103,21 @@
         // Process data
         function processRecords(records) {
             analyzedRecords = [];
+            const numbersByRound = new Map();
+
+            records.forEach(row => {
+                const round = parseInt(row['회차']);
+                if (isNaN(round)) return;
+                numbersByRound.set(round, [
+                    parseInt(row['번호1']),
+                    parseInt(row['번호2']),
+                    parseInt(row['번호3']),
+                    parseInt(row['번호4']),
+                    parseInt(row['번호5']),
+                    parseInt(row['번호6'])
+                ]);
+            });
+
             records.forEach(row => {
                 const ep = parseInt(row['회차']);
                 if (isNaN(ep)) return;
@@ -1115,6 +1131,10 @@
                     parseInt(row['번호6'])
                 ];
                 const bonus = parseInt(row['보너스']);
+                const previousNumbers = numbersByRound.get(ep - 1);
+                const carryCount = previousNumbers
+                    ? nums.filter(num => previousNumbers.includes(num)).length
+                    : null;
                 
                 const stats = analyzeDraw(nums);
                 analyzedRecords.push({
@@ -1123,6 +1143,8 @@
                     numbers: nums,
                     bonus: bonus,
                     winners1st: parseWinnerCount(row['1등당첨인원']),
+                    carryCount,
+                    carryPass: carryCount !== null && carryCount >= 1 && carryCount <= 2,
                     ...stats
                 });
             });
@@ -1236,6 +1258,8 @@
             const hlPass = analyzedRecords.filter(r => r.hlPass).length;
             const primePass = analyzedRecords.filter(r => r.primePass).length;
             const divPass = analyzedRecords.filter(r => r.divPass).length;
+            const carryRecords = analyzedRecords.filter(r => r.carryCount !== null);
+            const carryPass = carryRecords.filter(r => r.carryPass).length;
             
             const passRates = [
                 { name: '총합 합격률', count: sumPass },
@@ -1243,14 +1267,21 @@
                 { name: '홀짝 균형율', count: oddPass },
                 { name: '고저 균형율', count: hlPass },
                 { name: '소수 적정율', count: primePass },
-                { name: '3분할 분포율', count: divPass }
+                { name: '3분할 분포율', count: divPass },
+                {
+                    name: '이월수 합격률',
+                    count: carryPass,
+                    denominator: carryRecords.length,
+                    description: '직전 회차와 같은 번호가 1~2개인 회차'
+                }
             ];
             
             const grid = document.getElementById('rates-grid');
             grid.innerHTML = '';
             
             passRates.forEach(rate => {
-                const pct = (rate.count / total) * 100;
+                const denominator = rate.denominator ?? total;
+                const pct = denominator > 0 ? (rate.count / denominator) * 100 : 0;
                 
                 const box = document.createElement('div');
                 box.className = 'rate-box';
@@ -1262,6 +1293,7 @@
                     <div class="rate-progress-bg">
                         <div class="rate-progress-fill" style="width: ${pct}%"></div>
                     </div>
+                    ${rate.description ? `<div class="stat-lbl">${rate.description} · ${rate.count}/${denominator}회</div>` : ''}
                 `;
                 grid.appendChild(box);
             });
