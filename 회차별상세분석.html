@@ -66,11 +66,36 @@
         /* Navigation Tab Bar */
         .nav-bar {
             display: flex;
+            align-items: center;
+            justify-content: space-between;
             background: rgba(15, 23, 42, 0.4);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
-            padding: 4px;
+            padding: 6px 16px;
             margin-bottom: 25px;
+            position: relative;
+            z-index: 1000;
+        }
+
+        .nav-brand {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: #fff;
+            display: none; /* Hide on desktop */
+        }
+
+        .menu-toggle {
+            display: none; /* Hide on desktop */
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .nav-menu {
+            display: flex;
+            width: 100%;
             gap: 4px;
         }
 
@@ -644,16 +669,39 @@
                 font-size: 0.9rem;
             }
             .nav-bar {
-                overflow-x: auto;
-                white-space: nowrap;
-                flex-wrap: nowrap;
-                -webkit-overflow-scrolling: touch;
-                margin-bottom: 20px;
+                padding: 10px 16px;
+                margin-bottom: 25px;
+            }
+            .nav-brand {
+                display: block; /* Show brand name */
+            }
+            .menu-toggle {
+                display: block; /* Show hamburger icon */
+            }
+            .nav-menu {
+                display: none; /* Hide link menu by default */
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(11, 15, 25, 0.98);
+                border: 1px solid var(--glass-border);
+                border-radius: 12px;
+                margin-top: 8px;
+                padding: 8px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            }
+            .nav-menu.show {
+                display: flex; /* Toggle open */
             }
             .nav-link {
-                flex: 0 0 auto;
-                padding: 8px 12px;
-                font-size: 0.8rem;
+                flex: none;
+                text-align: left;
+                padding: 12px 16px;
+                width: 100%;
+                border-radius: 6px;
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -679,10 +727,16 @@
 
         <!-- Navigation Tabs -->
         <nav class="nav-bar">
-            <a href="index.html" class="nav-link">홈</a>
-            <a href="LOTTO STATS DECK.html" class="nav-link">실시간 분석 및 스마트 생성기</a>
-            <a href="역대통계분석.html" class="nav-link">역대 전체 대시보드</a>
-            <a href="회차별상세분석.html" class="nav-link active">회차별 상세 분석</a>
+            <div class="nav-brand">🎰 LOTTO STATS DECK</div>
+            <button class="menu-toggle" id="menu-toggle-btn" aria-label="메뉴 열기" onclick="document.getElementById('nav-menu-links').classList.toggle('show')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div class="nav-menu" id="nav-menu-links">
+                <a href="index.html" class="nav-link">홈</a>
+                <a href="LOTTO STATS DECK.html" class="nav-link">실시간 분석 및 스마트 생성기</a>
+                <a href="역대통계분석.html" class="nav-link">역대 전체 대시보드</a>
+                <a href="회차별상세분석.html" class="nav-link active">회차별 상세 분석</a>
+            </div>
         </nav>
 
         <!-- Dropzone for local file loads (Fallback) -->
