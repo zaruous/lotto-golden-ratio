@@ -118,6 +118,7 @@ function generateSmartSets(count = 3, maxTries = 500000) {
 }
 
 function buildMessage(sets, latestRound) {
+    const statsDeckUrl = 'https://zaruous.github.io/lotto-golden-ratio/LOTTO%20STATS%20DECK.html';
     const nextRound = latestRound + 1;
     const now = new Date();
     const dateStr = now.toLocaleDateString('ko-KR', {
@@ -132,13 +133,14 @@ function buildMessage(sets, latestRound) {
 
     sets.forEach((s, i) => {
         const balls = s.sorted.map(n => getBallEmoji(n) + '*' + n + '*').join(' ');
-        msg += '✨ *SET ' + (i + 1) + '*\n';
+        const setUrl = statsDeckUrl + '?numbers=' + s.sorted.join(',');
+        msg += '✨ [*SET ' + (i + 1) + '*](' + setUrl + ')\n';
         msg += balls + '\n';
         msg += '  합계: ' + s.sum + ' | AC: ' + s.ac + ' | 홀짝: ' + s.odd + ':' + s.even + ' | 고저: ' + s.low + ':' + s.high + '\n\n';
     });
 
     msg += '━━━━━━━━━━━━━━━━━━━━\n';
-    msg += '[분석 대시보드 보기](https://zaruous.github.io/lotto-golden-ratio/)\n';
+    msg += '[분석 대시보드 보기](' + statsDeckUrl + ')\n';
     msg += '_GitHub Actions 자동 생성_';
 
     return msg;
