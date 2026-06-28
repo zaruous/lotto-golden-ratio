@@ -52,6 +52,7 @@
 | [**LOTTO STATS DECK.html**](LOTTO%20STATS%20DECK.html) | 사용자 수동 조합 분석 및 **몬테카를로 조합 생성기** 화면. |
 | [**역대통계분석.html**](역대통계분석.html) | 역대 전체 당첨 기록의 필터별 성공 비율 분석 및 필터링 검색 대시보드. |
 | [**회차별상세분석.html**](회차별상세분석.html) | 특정 회차를 선택하여 이월/이웃/구간 분포를 차트로 보는 정밀 분석 도구. |
+| [**히트맵분석.html**](히트맵분석.html) | 기간별 번호 출현 빈도, 미출현 회차와 고빈도 순위를 시각화하는 히트맵 대시보드. |
 | [**supabase_config.js**](supabase_config.js) | Supabase Cloud Database 연동에 필요한 공개형 접속 URL 및 API Key 설정 파일. |
 | [**fetch_lotto.js**](fetch_lotto.js) | 동행복권 API에서 최신 데이터를 긁어와 CSV 및 Supabase DB를 자동 갱신해 주는 스크립트. |
 | [**migrate_to_supabase.js**](migrate_to_supabase.js) | 기존 로컬 CSV 데이터셋을 Supabase DB 테이블로 일괄 업로드하기 위한 최초 1회성 이관 스크립트. |

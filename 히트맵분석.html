@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로또 번호 빈도 히트맵 분석</title>
+    <style>
+        :root {
+            --bg-primary: #0b0f19; --bg-secondary: #1e293b;
+            --accent-primary: #6366f1; --accent-secondary: #a855f7;
+            --accent-success: #10b981; --accent-warning: #f59e0b;
+            --accent-error: #ef4444; --text-main: #f8fafc;
+            --text-muted: #94a3b8; --glass-bg: rgba(30, 41, 59, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, var(--bg-primary) 60%);
+            background-attachment: fixed; color: var(--text-main); min-height: 100vh;
+            padding: 20px; line-height: 1.6;
+        }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding-bottom: 50px; }
+        header { text-align: center; margin: 40px 0 35px; }
+        h1 { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #fff 40%, var(--accent-primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: var(--text-muted); margin-top: 6px; }
+        .nav-bar { display: flex; align-items: center; justify-content: space-between; background: rgba(15,23,42,.4); border: 1px solid var(--glass-border); border-radius: 12px; padding: 6px 16px; margin-bottom: 35px; position: relative; z-index: 1000; }
+        .nav-brand { display: none; font-weight: 800; font-size: .95rem; color: #fff; }
+        .menu-toggle { display: none; background: none; border: none; color: #fff; cursor: pointer; padding: 4px; }
+        .nav-menu { display: flex; width: 100%; gap: 4px; }
+        .nav-link { flex: 1; text-align: center; padding: 12px 15px; color: var(--text-muted); text-decoration: none; font-size: .9rem; font-weight: 600; border-radius: 8px; transition: all .2s; }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,.05); }
+        .nav-link.active { color: #fff; background: var(--accent-primary); box-shadow: 0 4px 10px rgba(99,102,241,.3); }
+        .card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 28px; box-shadow: 0 10px 25px rgba(0,0,0,.15); backdrop-filter: blur(10px); margin-bottom: 22px; }
+        .card-title { font-size: 1.05rem; font-weight: 750; margin-bottom: 6px; }
+        .card-desc { color: var(--text-muted); font-size: .86rem; margin-bottom: 18px; }
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
+        .control { display: flex; flex-direction: column; gap: 5px; }
+        label { color: var(--text-muted); font-size: .76rem; font-weight: 650; }
+        select, input { color: #fff; background: rgba(15,23,42,.75); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: 9px 12px; outline: none; }
+        select:focus, input:focus { border-color: var(--accent-primary); box-shadow: 0 0 8px rgba(99,102,241,.3); }
+        button { border: 0; border-radius: 8px; padding: 10px 18px; background: var(--accent-primary); color: #fff; font-weight: 700; cursor: pointer; }
+        .status { margin-left: auto; color: var(--text-muted); font-size: .82rem; padding-bottom: 8px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 22px; }
+        .summary-box { background: rgba(15,23,42,.35); border: 1px solid var(--glass-border); border-radius: 14px; padding: 16px; }
+        .summary-label { color: var(--text-muted); font-size: .76rem; }
+        .summary-value { font-size: 1.25rem; font-weight: 800; margin-top: 4px; }
+        .heatmap { display: grid; grid-template-columns: repeat(9,1fr); gap: 9px; }
+        .heat-cell { min-height: 94px; border-radius: 13px; padding: 10px; border: 1px solid rgba(255,255,255,.08); display: flex; flex-direction: column; justify-content: space-between; transition: transform .2s, border-color .2s; }
+        .heat-cell:hover { transform: translateY(-3px); border-color: rgba(255,255,255,.35); }
+        .heat-number { width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,.25); font-weight: 800; }
+        .heat-count { font-size: 1rem; font-weight: 800; text-align: right; }
+        .heat-meta { color: rgba(255,255,255,.72); font-size: .7rem; text-align: right; }
+        .legend { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; color: var(--text-muted); font-size: .72rem; align-items: center; }
+        .legend-bar { width: 160px; height: 9px; border-radius: 9px; background: linear-gradient(90deg, #172554, #4338ca, #a855f7, #f59e0b); }
+        .ranking-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .rank-list { display: grid; gap: 8px; }
+        .rank-row { display: grid; grid-template-columns: 34px 42px 1fr auto; align-items: center; gap: 8px; background: rgba(15,23,42,.3); border-radius: 10px; padding: 8px 10px; }
+        .rank-index { color: var(--text-muted); font-size: .75rem; }
+        .rank-num { font-weight: 800; }
+        .rank-bar { height: 7px; border-radius: 7px; background: rgba(255,255,255,.07); overflow: hidden; }
+        .rank-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--accent-primary),var(--accent-secondary)); }
+        .rank-value { font-size: .78rem; font-weight: 700; }
+        .notice { color: var(--text-muted); font-size: .78rem; margin-top: 15px; }
+        @media (max-width: 900px) { .heatmap { grid-template-columns: repeat(5,1fr); } .summary-grid { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 768px) {
+            body { padding: 12px; } header { margin: 20px 0 15px; } h1 { font-size: 2rem; }
+            .nav-bar { padding: 10px 16px; margin-bottom: 25px; }
+            .nav-brand { display: block; }
+            .menu-toggle { display: block; }
+            .nav-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; background: rgba(11,15,25,.98); border: 1px solid var(--glass-border); border-radius: 12px; margin-top: 8px; padding: 8px; box-shadow: 0 10px 25px rgba(0,0,0,.5); }
+            .nav-menu.show { display: flex; } .nav-link { flex: none; text-align: left; padding: 12px 16px; width: 100%; border-radius: 6px; font-size: .85rem; }
+            .card { padding: 18px; } .status { width: 100%; margin-left: 0; }
+            .heatmap { grid-template-columns: repeat(3,1fr); gap: 7px; }
+            .heat-cell { min-height: 88px; padding: 8px; } .ranking-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+    <script src="supabase_config.js"></script>
+</head>
+<body>
+<div class="container">
+    <header><h1>번호 빈도 히트맵 분석</h1><div class="subtitle">선택한 회차 범위에서 1~45 번호의 출현 빈도와 미출현 기간을 비교합니다.</div></header>
+    <nav class="nav-bar">
+        <div class="nav-brand">🎰 LOTTO STATS DECK</div>
+        <button class="menu-toggle" id="menu-toggle-btn" aria-label="메뉴 열기" onclick="document.getElementById('nav-menu-links').classList.toggle('show')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="nav-menu" id="nav-menu-links">
+            <a href="index.html" class="nav-link">홈</a>
+            <a href="LOTTO STATS DECK.html" class="nav-link">실시간 분석 및 스마트 생성기</a>
+            <a href="역대통계분석.html" class="nav-link">역대 전체 대시보드</a>
+            <a href="회차별상세분석.html" class="nav-link">회차별 상세 분석</a>
+            <a href="히트맵분석.html" class="nav-link active">히트맵 분석</a>
+        </div>
+    </nav>
+    <section class="card">
+        <div class="card-title">분석 범위</div><div class="card-desc">기간을 바꾸면 히트맵과 순위가 즉시 다시 계산됩니다.</div>
+        <div class="controls">
+            <div class="control"><label for="range-preset">빠른 선택</label><select id="range-preset"><option value="all">전체 회차</option><option value="10">최근 10회</option><option value="30">최근 30회</option><option value="50" selected>최근 50회</option><option value="100">최근 100회</option><option value="custom">사용자 지정</option></select></div>
+            <div class="control"><label for="start-round">시작 회차</label><input type="number" id="start-round"></div>
+            <div class="control"><label for="end-round">종료 회차</label><input type="number" id="end-round"></div>
+            <button id="apply-btn">분석 적용</button><div class="status" id="load-status">데이터를 불러오는 중...</div>
+        </div>
+    </section>
+    <div class="summary-grid" id="summary-grid" hidden>
+        <div class="summary-box"><div class="summary-label">분석 회차</div><div class="summary-value" id="summary-range">-</div></div>
+        <div class="summary-box"><div class="summary-label">가장 많이 나온 번호</div><div class="summary-value" id="summary-hot">-</div></div>
+        <div class="summary-box"><div class="summary-label">가장 적게 나온 번호</div><div class="summary-value" id="summary-cold">-</div></div>
+        <div class="summary-box"><div class="summary-label">최장 미출현 번호</div><div class="summary-value" id="summary-overdue">-</div></div>
+    </div>
+    <section class="card" id="heat-card" hidden>
+        <div class="card-title">1~45 출현 빈도 히트맵</div><div class="card-desc">색이 밝을수록 선택한 기간의 평균보다 자주 출현한 번호입니다.</div>
+        <div class="heatmap" id="heatmap"></div><div class="legend"><span>낮음</span><div class="legend-bar"></div><span>높음</span></div>
+        <div class="notice">※ 과거 출현 빈도는 다음 추첨의 당첨 가능성을 높이거나 낮추지 않습니다. 각 추첨은 독립적입니다.</div>
+    </section>
+    <section class="ranking-grid" id="ranking-grid" hidden>
+        <div class="card"><div class="card-title">🔥 고빈도 TOP 10</div><div class="card-desc">선택 범위에서 많이 출현한 번호입니다.</div><div class="rank-list" id="hot-ranking"></div></div>
+        <div class="card"><div class="card-title">⏳ 미출현 기간 TOP 10</div><div class="card-desc">최신 회차 기준 오래 나오지 않은 번호입니다.</div><div class="rank-list" id="overdue-ranking"></div></div>
+    </section>
+</div>
+<script>
+    let records = [];
+    const parseCSV = text => {
+        const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean);
+        const headers = lines.shift().split(',').map(v => v.trim());
+        return lines.map(line => { const values = line.split(','); const row = {}; headers.forEach((h,i) => row[h] = values[i]); return row; });
+    };
+    function normalizeRows(rows, source) {
+        return rows.map(row => ({
+            round: Number(source === 'db' ? row.round : row['회차']),
+            numbers: [1,2,3,4,5,6].map(i => Number(source === 'db' ? row[`num${i}`] : row[`번호${i}`]))
+        })).filter(r => Number.isInteger(r.round) && r.numbers.every(n => n >= 1 && n <= 45)).sort((a,b) => a.round-b.round);
+    }
+    async function loadData() {
+        try {
+            if (!window.SUPABASE_CONFIG?.url || !SUPABASE_CONFIG.anonKey) throw new Error('Supabase 설정 없음');
+            const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/lotto_history?select=round,num1,num2,num3,num4,num5,num6&order=round.asc`, { headers: { apikey: SUPABASE_CONFIG.anonKey, Authorization: `Bearer ${SUPABASE_CONFIG.anonKey}` } });
+            if (!res.ok) throw new Error('Supabase 응답 실패'); records = normalizeRows(await res.json(), 'db');
+            document.getElementById('load-status').textContent = `Supabase · ${records.length.toLocaleString()}개 회차`;
+        } catch (error) {
+            const res = await fetch('lotto_history.csv'); if (!res.ok) throw error;
+            records = normalizeRows(parseCSV(await res.text()), 'csv');
+            document.getElementById('load-status').textContent = `CSV · ${records.length.toLocaleString()}개 회차`;
+        }
+        initializeRange();
+    }
+    function initializeRange() {
+        const min = records[0].round, max = records.at(-1).round;
+        ['start-round','end-round'].forEach(id => { document.getElementById(id).min = min; document.getElementById(id).max = max; });
+        applyPreset('50'); render();
+    }
+    function applyPreset(value) {
+        const min = records[0].round, max = records.at(-1).round;
+        document.getElementById('start-round').value = value === 'all' ? min : Math.max(min, max - Number(value) + 1);
+        document.getElementById('end-round').value = max;
+    }
+    function render() {
+        let start = Number(document.getElementById('start-round').value), end = Number(document.getElementById('end-round').value);
+        if (start > end) [start,end] = [end,start];
+        const selected = records.filter(r => r.round >= start && r.round <= end); if (!selected.length) return;
+        const counts = Array(46).fill(0), lastSeen = Array(46).fill(null), latestRound = selected.at(-1).round;
+        selected.forEach(r => r.numbers.forEach(n => { counts[n]++; lastSeen[n] = r.round; }));
+        const stats = Array.from({length:45},(_,i) => ({ number:i+1, count:counts[i+1], rate:counts[i+1]/selected.length*100, overdue:lastSeen[i+1] === null ? selected.length : latestRound-lastSeen[i+1] }));
+        const maxCount = Math.max(...stats.map(s=>s.count)), minCount = Math.min(...stats.map(s=>s.count));
+        const hot = [...stats].sort((a,b)=>b.count-a.count || a.number-b.number), cold = [...stats].sort((a,b)=>a.count-b.count || a.number-b.number), overdue = [...stats].sort((a,b)=>b.overdue-a.overdue || a.number-b.number);
+        document.getElementById('summary-range').textContent = `${selected[0].round}~${latestRound}회 (${selected.length}회)`;
+        document.getElementById('summary-hot').textContent = `${hot[0].number}번 · ${hot[0].count}회`;
+        document.getElementById('summary-cold').textContent = `${cold[0].number}번 · ${cold[0].count}회`;
+        document.getElementById('summary-overdue').textContent = `${overdue[0].number}번 · ${overdue[0].overdue}회`;
+        const map = document.getElementById('heatmap'); map.innerHTML = '';
+        stats.forEach(s => { const ratio = maxCount === minCount ? .5 : (s.count-minCount)/(maxCount-minCount); const hue = 235 + ratio*35; const light = 19 + ratio*30; const cell = document.createElement('div'); cell.className='heat-cell'; cell.style.background=`linear-gradient(145deg, hsl(${hue} 65% ${light}%), rgba(30,41,59,.72))`; cell.title=`${s.number}번: ${s.count}회 출현, 최근 ${s.overdue}회 미출현`; cell.innerHTML=`<span class="heat-number">${s.number}</span><div><div class="heat-count">${s.count}회</div><div class="heat-meta">${s.rate.toFixed(1)}% · 미출현 ${s.overdue}회</div></div>`; map.appendChild(cell); });
+        renderRanking('hot-ranking', hot.slice(0,10), s=>`${s.count}회`, maxCount, s=>s.count);
+        renderRanking('overdue-ranking', overdue.slice(0,10), s=>`${s.overdue}회`, Math.max(...overdue.map(s=>s.overdue),1), s=>s.overdue);
+        ['summary-grid','heat-card','ranking-grid'].forEach(id => document.getElementById(id).hidden = false);
+    }
+    function renderRanking(id, data, formatter, max, value) { document.getElementById(id).innerHTML = data.map((s,i)=>`<div class="rank-row"><span class="rank-index">${i+1}</span><span class="rank-num">${s.number}번</span><div class="rank-bar"><div class="rank-fill" style="width:${value(s)/max*100}%"></div></div><span class="rank-value">${formatter(s)}</span></div>`).join(''); }
+    document.getElementById('range-preset').addEventListener('change', e => { if (e.target.value !== 'custom') { applyPreset(e.target.value); render(); } });
+    ['start-round','end-round'].forEach(id => document.getElementById(id).addEventListener('input', () => document.getElementById('range-preset').value='custom'));
+    document.getElementById('apply-btn').addEventListener('click', render);
+    loadData().catch(error => document.getElementById('load-status').textContent = `로드 실패: ${error.message}`);
+</script>
+</body>
+</html>
