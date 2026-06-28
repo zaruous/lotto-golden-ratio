@@ -12,7 +12,17 @@
 
 ## 📸 플랫폼 프리뷰 (Preview)
 
-![로또 황금비율 플랫폼 대시보드 미리보기](lotto_dashboard_screenshot.png)
+### 🏠 1. 메인 인트로 허브 (index.html)
+![메인 인트로 허브](lotto_dashboard_screenshot.png)
+
+### 🎰 2. 실시간 분석 & 스마트 생성기 (LOTTO STATS DECK.html)
+![실시간 분석 & 스마트 생성기](lotto_deck_screenshot.png)
+
+### 📊 3. 역대 전체 통계 분석 대시보드 (역대통계분석.html)
+![역대 전체 통계 분석 대시보드](lotto_history_screenshot.png)
+
+### 🔍 4. 회차별 정밀 상세 분석 (회차별상세분석.html)
+![회차별 정밀 상세 분석](lotto_detail_screenshot.png)
 
 ---
 
