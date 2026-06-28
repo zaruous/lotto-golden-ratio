@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=device-width, initial-scale=1.0">
+    <title>로또 통계적 접근 분석기 | LOTTO STATS DECK</title>
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #1e293b;
+            --accent-primary: #6366f1;   /* Indigo */
+            --accent-secondary: #a855f7; /* Purple */
+            --accent-success: #10b981;   /* Emerald */
+            --accent-warning: #f59e0b;   /* Amber */
+            --accent-error: #ef4444;     /* Rose */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(30, 41, 59, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, var(--bg-primary) 60%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 50px;
+        }
+
+        /* Header / Hero Section */
+        header {
+            text-align: center;
+            margin: 40px 0 35px 0;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 40%, var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Navigation Tab Bar */
+        .nav-bar {
+            display: flex;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 35px;
+            gap: 4px;
+        }
+
+        .nav-link {
+            flex: 1;
+            text-align: center;
+            padding: 12px 15px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link.active {
+            color: #fff;
+            background: var(--accent-primary);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Entrance Cards Grid */
+        .entrances-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        @media (min-width: 768px) {
+            .entrances-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .entrance-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .entrance-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .entrance-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.12);
+        }
+
+        .entrance-card:hover::before {
+            opacity: 1;
+        }
+
+        .entrance-header {
+            margin-bottom: 20px;
+        }
+
+        .entrance-icon {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .entrance-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .entrance-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .entrance-action {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-top: 15px;
+            transition: gap 0.2s;
+        }
+
+        .entrance-card:hover .entrance-action {
+            gap: 10px;
+            color: var(--accent-secondary);
+        }
+
+        /* Fact Check Alert Banner */
+        .fact-check-banner {
+            background: rgba(30, 41, 59, 0.25);
+            border: 1px dashed rgba(245, 158, 11, 0.2);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 40px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .fact-check-icon {
+            font-size: 1.8rem;
+            line-height: 1;
+            padding-top: 2px;
+        }
+
+        .fact-check-content h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--accent-warning);
+            margin-bottom: 8px;
+        }
+
+        .fact-check-content p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Theory Section */
+        .theory-section {
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 10px;
+        }
+
+        .theory-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .theory-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .theory-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .theory-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            backdrop-filter: blur(8px);
+        }
+
+        .theory-badge-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .theory-num {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .theory-card h4 {
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .theory-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>LOTTO STATS DECK</h1>
+            <div class="subtitle">역대 당첨 데이터를 기조로 한 다차원 통계 필터링 및 스마트 넘버 분석 플랫폼</div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link active">홈</a>
+            <a href="LOTTO STATS DECK.html" class="nav-link">실시간 분석 및 스마트 생성기</a>
+            <a href="역대통계분석.html" class="nav-link">역대 전체 대시보드</a>
+            <a href="회차별상세분석.html" class="nav-link">회차별 상세 분석</a>
+        </nav>
+
+        <!-- Main Dashboard Entrances -->
+        <div class="entrances-grid">
+            
+            <!-- 1. Real-time selection & Smart generator -->
+            <a href="LOTTO STATS DECK.html" class="entrance-card">
+                <div class="entrance-header">
+                    <span class="entrance-icon">⚡</span>
+                    <h2 class="entrance-title">실시간 생성 & 분석</h2>
+                    <p class="entrance-desc">내가 직접 번호를 클릭하여 실시간 조화도 점수를 검증하거나, 통계 규칙 만족을 타깃으로 하는 고속 몬테카를로 스마트 필터 추출기를 실행합니다.</p>
+                </div>
+                <div class="entrance-action">
+                    선택기 실행하기 ➔
+                </div>
+            </a>
+
+            <!-- 2. Overall History statistics -->
+            <a href="역대통계분석.html" class="entrance-card">
+                <div class="entrance-header">
+                    <span class="entrance-icon">📊</span>
+                    <h2 class="entrance-title">역대 전체 대시보드</h2>
+                    <p class="entrance-desc">200회차부터 최근 회차까지 누적된 데이터를 전수 분석합니다. 합격률 인포그래픽과 조화 등급 분포 차트, 복합 다중 필터링 검색 시스템을 제공합니다.</p>
+                </div>
+                <div class="entrance-action">
+                    대시보드 열기 ➔
+                </div>
+            </a>
+
+            <!-- 3. Round-by-Round Analyzer -->
+            <a href="회차별상세분석.html" class="entrance-card">
+                <div class="entrance-header">
+                    <span class="entrance-icon">🔍</span>
+                    <h2 class="entrance-title">회차별 상세 분석</h2>
+                    <p class="entrance-desc">특정 회차의 실제 번호 조합이 통계적 관점에서 어떤 규칙들을 만족했고 어떤 하모니 점수(0~100점)를 받았는지 직전 회차 대비 이월/이웃수와 함께 분석합니다.</p>
+                </div>
+                <div class="entrance-action">
+                    회차별 정밀 추적 ➔
+                </div>
+            </a>
+        </div>
+
+        <!-- Fact Check Banner -->
+        <div class="fact-check-banner">
+            <div class="fact-check-icon">💡</div>
+            <div class="fact-check-content">
+                <h3>진짜 통계를 활용해 로또 예측이 가능할까요?</h3>
+                <p>
+                    로또 기계는 매주 물리적으로 완전히 독립된 <strong>약 814만 분의 1</strong> 확률로 난수공을 추출합니다. 따라서 어떠한 통계적 규칙도 미래의 당첨 번호를 물리적으로 예약하거나 보장할 수 없습니다.<br>
+                    본 플랫폼은 확률 자체를 올리는 것이 아니라, 극단적으로 비정상적인 조합(예: 연속된 순차 번호 <code>1, 2, 3, 4, 5, 6</code>이나 단일 홀수 쏠림 등)을 필터링하고, <strong>역대 당첨 이력의 90% 이상이 증명하는 '통계적 평균 조화 구간'</strong> 내로 조합 범위를 좁혀 합리적인 시뮬레이션을 하도록 돕는 스마트 가이드 시스템입니다.
+                </p>
+            </div>
+        </div>
+
+        <!-- 8 Statistical Theories Section -->
+        <div class="theory-section">
+            <h2 class="section-title">🧬 반영된 8대 통계학적 접근법</h2>
+            <div class="theory-grid">
+                
+                <!-- 1. AC 복잡도 -->
+                <div class="theory-card">
+                    <div class="theory-badge-title">
+                        <h4>AC 산술 복잡도</h4>
+                        <span class="theory-num">규칙 1</span>
+                    </div>
+                    <p>6개 번호쌍이 갖는 15개 차이값 중 고유한(Unique) 개수에서 5를 뺀 값($AC=U-5$). 규칙적인 수열을 걸러내고 실제 복잡성(황금구간: 7~10)을 확인합니다.</p>
+                </div>
+
+                <!-- 2. 총합(Sum) 구간 -->
+                <div class="theory-card">
+                    <div class="theory-badge-title">
+                        <h4>총합(Sum) 구간</h4>
+                        <span class="theory-num">규칙 2</span>
+                    </div>
+                    <p>보너스를 제외한 6개 번호의 합계입니다. 수학적 평균은 138이며, 역대 실제 당첨 번호의 약 73%가 100 ~ 175 사이의 황금 구간에 몰려 분포합니다.</p>
+                </div>
+
+                <!-- 3. 홀짝(Odd/Even) 비율 -->
+                <div class="theory-card">
+                    <div class="theory-badge-title">
+                        <h4>홀짝 균형</h4>
+                        <span class="theory-num">규칙 3</span>
+                    </div>
+                    <p>모두 홀수이거나 짝수인 경우는 매우 드뭅니다. 안정적인 통계 기준인 3:3 또는 2:4, 4:2 균형 조합이 전체 당첨 비율의 약 80% 이상을 점유합니다.</p>
+                </div>
+
+                <!-- 4. 고저(High/Low) 비율 -->
+                <div class="theory-card">
+                    <div class="theory-badge-title">
+                        <h4>고저 균형</h4>
+                        <span class="theory-num">규칙 4</span>
+                    </div>
+                    <p>로또 번호 절반 기준인 23을 기점으로 낮은 수(1~22)와 높은 수(23~45)의 분포를 봅니다. 홀짝과 같이 3:3, 2:4, 4:2 균형 배치를 권장합니다.</p>
+                </div>
+
+                <!-- 5. 소수(Prime) 분석 -->
+                <div class="theory-card">
+                    <div class="theory-badge-title">
+                        <h4>소수 적정 출현</h4>
+                        <span class="theory-num">규칙 5</span>
+                    </div>
+                    <p>1~45 범위 내의 14개 소수가 포함된 개수입니다. 역대 실제 당첨 번호는 통계적으로 조합 내에 소수가 1개, 2개 또는 3개 들어가는 경우가 약 80%를 넘습니다.</p>
+                </div>
+
+                <!-- 6. 3분할 구간 분석 -->
+                <div class="theory-card">
+                    <div class="theory-badge-title">
+                        <h4>3분할 구간</h4>
+                        <span class="theory-num">규칙 6</span>
+                    </div>
+                    <p>번호 대역을 1~15, 16~30, 31~45 세 구간으로 나누어 치우침이 없는지 분석합니다. 특정 영역에만 쏠리지 않고 고루 분산(구간당 최대 4개 이하)되는 조합이 통계적 표준입니다.</p>
+                </div>
+
+                <!-- 7. 이월수 및 이웃수 -->
+                <div class="theory-card">
+                    <div class="theory-badge-title">
+                        <h4>이월/이웃 패턴</h4>
+                        <span class="theory-num">규칙 7</span>
+                    </div>
+                    <p>직전 회차 번호와 동일한 수(이월수) 및 직전 번호의 양옆 수(이웃수)가 조합에 포함되는 패턴입니다. 평균적으로 매회 1~2개의 이월수 및 이웃수가 자주 출현합니다.</p>
+                </div>
+
+                <!-- 8. 빈도 분석 (핫/콜드) -->
+                <div class="theory-card">
+                    <div class="theory-badge-title">
+                        <h4>빈도 분석</h4>
+                        <span class="theory-num">규칙 8</span>
+                    </div>
+                    <p>최근 주차 혹은 역대 전체 회차에서 가장 많이 출현한 인기 번호(Hot) 및 오랫동안 나타나지 않아 출현 가능성을 점치는 번호(Cold)의 통계적 균형을 조망합니다.</p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

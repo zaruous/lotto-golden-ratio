@@ -1,0 +1,44 @@
+name: Weekly Lotto Auto Update
+
+on:
+  schedule:
+    # 매주 일요일 한국 시간(KST) 오전 8:00에 실행 (UTC 토요일 23:00)
+    - cron: '0 23 * * 6'
+  workflow_dispatch: # 수동으로 즉시 갱신을 실행할 수 있는 버튼을 깃허브 웹에 활성화
+
+permissions:
+  contents: write # 갱신된 CSV 파일을 저장소에 푸시(Push)하기 위한 쓰기 권한 설정
+
+jobs:
+  update-lotto-csv:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 저장소 코드 가져오기
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Node.js 런타임 설치
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # 3. 데이터 갱신 스크립트 실행
+      - name: Run Fetch Script
+        run: node fetch_lotto.js
+
+      # 4. 변경 사항이 있을 경우 자동 커밋 및 푸시
+      - name: Commit & Push changes if updated
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add lotto_history.csv
+          
+          # 변경사항(diff)이 있는 경우에만 커밋 및 푸시 수행
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "auto: 주간 로또 당첨내역 자동 업데이트"
+            git push
+            echo "CSV 데이터가 성공적으로 갱신되어 저장소에 업로드되었습니다."
+          else
+            echo "갱신할 새로운 당첨 회차 데이터가 없습니다."
+          fi
