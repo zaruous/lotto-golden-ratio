@@ -1,0 +1,33 @@
+﻿name: Weekly Smart Number → Telegram
+
+on:
+  schedule:
+    # 매주 금요일 오후 12시 KST (UTC 03:00)
+    - cron: '0 3 * * 5'
+  workflow_dispatch: # 수동 즉시 실행 버튼 (테스트용)
+
+jobs:
+  send-telegram:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 저장소 코드 가져오기
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Node.js 런타임 설치
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # 3. 스마트 번호 생성 및 텔레그램 발송
+      - name: Generate & Send Smart Numbers
+        run: node send_lotto_telegram.js
+        env:
+          # Supabase 연동 (기존 Secret 재사용)
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          # 텔레그램 봇 설정 (GitHub Secrets에 등록 필요)
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
