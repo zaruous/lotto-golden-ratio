@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로또 통계 하모니 분석 & 생성기</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Montserrat:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #1e293b;
+            --accent-primary: #6366f1;   /* Indigo */
+            --accent-secondary: #a855f7; /* Purple */
+            --accent-success: #10b981;   /* Emerald */
+            --accent-warning: #f59e0b;   /* Amber */
+            --accent-error: #ef4444;     /* Rose */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(30, 41, 59, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            
+            /* Lotto Ball Colors */
+            --lotto-yellow: linear-gradient(135deg, #facc15, #ca8a04);
+            --lotto-blue: linear-gradient(135deg, #60a5fa, #2563eb);
+            --lotto-red: linear-gradient(135deg, #f87171, #dc2626);
+            --lotto-gray: linear-gradient(135deg, #9ca3af, #4b5563);
+            --lotto-green: linear-gradient(135deg, #4ade80, #16a34a);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, var(--bg-primary) 60%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        /* Glassmorphism Container */
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 50px;
+        }
+
+        header {
+            text-align: center;
+            margin: 40px 0 35px 0;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 40%, var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1.1fr 0.9fr;
+            }
+        }
+
+        .panel-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        .panel-desc {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        /* 1-45 Number Grid */
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .number-btn {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.6);
+            color: #cbd5e1;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .number-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--accent-primary);
+            transform: scale(1.1);
+            color: #fff;
+        }
+
+        .number-btn.selected {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.6);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        /* Selected Balls Row */
+        .selected-balls-container {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 18px;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .balls-row {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .ball {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 
+                inset -3px -3px 6px rgba(0, 0, 0, 0.45),
+                inset 3px 3px 6px rgba(255, 255, 255, 0.35),
+                0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .ball.num-1-10 { background: var(--lotto-yellow); }
+        .ball.num-11-20 { background: var(--lotto-blue); }
+        .ball.num-21-30 { background: var(--lotto-red); }
+        .ball.num-31-40 { background: var(--lotto-gray); }
+        .ball.num-41-45 { background: var(--lotto-green); }
+
+        .ball-placeholder {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.15);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* SVG Harmony Score Circular Gauge */
+        .score-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .score-circle-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin-bottom: 12px;
+        }
+
+        .score-ring {
+            transform: rotate(-90deg);
+        }
+
+        .score-ring-bg {
+            stroke: rgba(255, 255, 255, 0.04);
+        }
+
+        .score-ring-progress {
+            stroke: url(#scoreGradient);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .score-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        #score-val {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .score-text .pct {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .score-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        /* Metrics Card List */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 600px) {
+            .metrics-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .metric-card {
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .metric-card:hover {
+            border-color: rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .metric-icon-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric-icon-wrap {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metric-title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #f3f4f6;
+        }
+
+        .metric-target {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+        }
+
+        .status-badge.pass {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-success);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .status-badge.fail {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-error);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .status-badge.neutral {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .metric-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Split Bar */
+        .split-visualizer {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .split-segment {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .split-segment.low-side {
+            background: var(--accent-primary);
+        }
+
+        .split-segment.high-side {
+            background: var(--accent-secondary);
+        }
+
+        .split-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        /* 3-Division Visualization */
+        .division-visualizer {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 38px;
+            margin-top: 8px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 8px;
+            padding: 4px;
+            gap: 6px;
+        }
+
+        .div-bar-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 30%;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .div-bar-fill {
+            width: 100%;
+            background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary));
+            border-radius: 3px;
+            height: 0%;
+            transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .div-bar-lbl {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Prev Draw input */
+        .prev-draw-panel {
+            background: rgba(15, 23, 42, 0.2);
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .prev-numbers-input-wrap {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            justify-content: space-between;
+        }
+
+        .prev-num-input {
+            width: 15%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.5);
+            color: #fff;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .prev-num-input:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Smart Generator Panel */
+        .generator-panel {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+        }
+
+        .filter-options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        @media (min-width: 768px) {
+            .filter-options-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .filter-check-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            user-select: none;
+            background: rgba(15, 23, 42, 0.3);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.2s;
+        }
+
+        .filter-check-label:hover {
+            background: rgba(15, 23, 42, 0.4);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .filter-check-label input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            background: rgba(15, 23, 42, 0.4);
+            cursor: pointer;
+            display: grid;
+            place-content: center;
+            transition: all 0.2s;
+        }
+
+        .filter-check-label input[type="checkbox"]::before {
+            content: "";
+            width: 10px;
+            height: 10px;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em var(--accent-primary);
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+
+        .filter-check-label input[type="checkbox"]:checked {
+            border-color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-check-label input[type="checkbox"]:checked::before {
+            transform: scale(1);
+        }
+
+        .gen-action-area {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-weight: 600;
+            padding: 14px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            flex-grow: 1;
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+            padding: 10px 20px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Generated Combination Card */
+        #generated-result-wrap {
+            margin-top: 15px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .generated-card {
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .generated-card h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #a5b4fc;
+        }
+
+        .gen-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Custom Notification Toast */
+        .notification-toast {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--accent-primary);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .notification-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            display: flex;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 25px;
+            gap: 4px;
+        }
+
+        .nav-link {
+            flex: 1;
+            text-align: center;
+            padding: 12px 15px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link.active {
+            color: #fff;
+            background: var(--accent-primary);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Number Grid Filter Bar */
+        .grid-filter-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .filter-bar-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-muted);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-chip:hover {
+            color: #fff;
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--accent-primary);
+        }
+
+        .filter-chip.active {
+            background: rgba(99, 102, 241, 0.18);
+            border-color: var(--accent-primary);
+            color: #fff;
+        }
+
+        /* Dimmed number buttons */
+        .number-btn.dimmed {
+            opacity: 0.22;
+            transform: scale(0.92);
+            filter: grayscale(0.5);
+        }
+
+        /* Tooltip implementation */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            margin-left: 4px;
+            font-weight: 700;
+            cursor: help;
+            vertical-align: middle;
+            transition: all 0.2s;
+        }
+
+        .tooltip-icon:hover {
+            background: var(--accent-primary);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <svg width="0" height="0" style="position: absolute; width: 0; height: 0; overflow: hidden;">
+        <defs>
+            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#818cf8" />
+                <stop offset="100%" stop-color="#c084fc" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="container">
+        <header>
+            <h1>LOTTO STATS DECK</h1>
+            <div class="subtitle">실시간 산술적 복잡도(AC) 및 통계적 하모니 분석 시스템</div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link">홈</a>
+            <a href="LOTTO STATS DECK.html" class="nav-link active">실시간 분석 및 스마트 생성기</a>
+            <a href="역대통계분석.html" class="nav-link">역대 전체 대시보드</a>
+            <a href="회차별상세분석.html" class="nav-link">회차별 상세 분석</a>
+        </nav>
+
+        <div class="dashboard-grid">
+            <!-- Left Side: Selection Panel -->
+            <div class="panel-card">
+                <div>
+                    <div class="panel-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+                        번호 선택판
+                    </div>
+                    <p class="panel-desc">아래 1부터 45까지의 번호판에서 원하는 번호 6개를 선택하세요. 실시간으로 통계 분석 대시보드가 업데이트됩니다.</p>
+                </div>
+
+                <div class="grid-filter-bar">
+                    <span class="filter-bar-title">번호 하이라이트 필터</span>
+                    <div class="filter-chips">
+                        <button class="filter-chip active" onclick="setGridFilter('all')" data-tooltip="모든 번호를 밝게 표시합니다.">전체</button>
+                        <button class="filter-chip" onclick="setGridFilter('odd')" data-tooltip="홀수 번호만 활성화하고 짝수 번호는 어둡게 표시합니다.">홀수</button>
+                        <button class="filter-chip" onclick="setGridFilter('even')" data-tooltip="짝수 번호만 활성화하고 홀수 번호는 어둡게 표시합니다.">짝수</button>
+                        <button class="filter-chip" onclick="setGridFilter('prime')" data-tooltip="1과 자기 자신으로만 나누어지는 소수(2, 3, 5, 7, 11...)만 밝게 표시합니다.">소수</button>
+                        <button class="filter-chip" onclick="setGridFilter('multiple3')" data-tooltip="3의 배수(3, 6, 9, 12, 15...)만 밝게 표시합니다.">3의 배수</button>
+                        <button class="filter-chip" onclick="setGridFilter('prevNeighbors')" data-tooltip="설정된 직전 회차 당첨 번호의 양옆 숫자(이웃수)만 밝게 표시합니다.">이웃수</button>
+                    </div>
+                </div>
+
+                <div class="number-grid" id="number-board">
+                    <!-- Numbers 1 to 45 injected dynamically -->
+                </div>
+
+                <div class="selected-balls-container">
+                    <div class="balls-row" id="selected-balls">
+                        <!-- Placeholders or selected balls -->
+                    </div>
+                </div>
+
+                <!-- Prev draw config -->
+                <div class="prev-draw-panel">
+                    <div class="panel-desc" style="font-weight: 600; color: #fff; margin-bottom: 4px;">직전 회차 당첨 번호 설정</div>
+                    <p class="panel-desc">이월수 및 이웃수 분석에 기준이 되는 직전 회차 번호 6개를 설정합니다.</p>
+                    <div class="prev-numbers-input-wrap">
+                        <input type="number" class="prev-num-input" id="prev-1" value="3" min="1" max="45" onchange="validatePrevDrawInputs()">
+                        <input type="number" class="prev-num-input" id="prev-2" value="12" min="1" max="45" onchange="validatePrevDrawInputs()">
+                        <input type="number" class="prev-num-input" id="prev-3" value="20" min="1" max="45" onchange="validatePrevDrawInputs()">
+                        <input type="number" class="prev-num-input" id="prev-4" value="27" min="1" max="45" onchange="validatePrevDrawInputs()">
+                        <input type="number" class="prev-num-input" id="prev-5" value="34" min="1" max="45" onchange="validatePrevDrawInputs()">
+                        <input type="number" class="prev-num-input" id="prev-6" value="42" min="1" max="45" onchange="validatePrevDrawInputs()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Statistical Dashboard -->
+            <div class="panel-card">
+                <div>
+                    <div class="panel-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        통계 하모니 대시보드
+                    </div>
+                </div>
+
+                <div class="score-panel">
+                    <div class="score-circle-container">
+                        <svg class="score-ring" width="140" height="140">
+                            <circle class="score-ring-bg" cx="70" cy="70" r="60" stroke-width="8" fill="transparent"/>
+                            <circle class="score-ring-progress" id="score-progress" cx="70" cy="70" r="60" stroke-width="10" fill="transparent"
+                                    stroke-dasharray="377" stroke-dashoffset="377"/>
+                        </svg>
+                        <div class="score-text">
+                            <div id="score-val">0</div>
+                            <div class="score-label" id="score-grade">준비 대기</div>
+                        </div>
+                    </div>
+                    <p class="panel-desc" style="text-align: center;">전체 필터 조화도를 100점 만점 기준으로 환산한 지수입니다.</p>
+                </div>
+
+                <div class="metrics-grid">
+                    <!-- 1. Sum Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(99, 102, 241, 0.1); color: var(--accent-primary);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19V5"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">총합 분석<span class="tooltip-icon" data-tooltip="선택한 6개 번호의 합계입니다. 역대 로또 당첨 조합의 약 73%는 합계가 100~175 사이의 황금구간에 분포해 있습니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 100 ~ 175</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-sum">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-value" id="val-sum">0</span>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="progress-sum"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. AC Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(168, 85, 247, 0.1); color: var(--accent-secondary);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">AC 복잡도<span class="tooltip-icon" data-tooltip="산술적 복잡도 수치입니다. 6개 번호의 모든 가능한 차이값(총 15개) 중 고유한 차이 개수에서 5를 뺀 값으로, 실제 당첨 조합은 AC=7~10 범위인 경우가 90% 이상입니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 7 ~ 10</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-ac">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-value" id="val-ac">0</span>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="progress-ac"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Odd/Even Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-success);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 12h14"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">홀짝 비율<span class="tooltip-icon" data-tooltip="홀수와 짝수의 배분 비율입니다. 6개 모두 홀수이거나 짝수인 극단적인 분포는 제외하고, 3:3, 2:4, 4:2의 균형 잡힌 비율(역대 당첨률 80% 이상)을 권장합니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 3:3 / 2:4 / 4:2</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-oddeven">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <div class="split-visualizer">
+                                <div class="split-segment low-side" id="odd-bar" style="width: 50%;"></div>
+                                <div class="split-segment high-side" id="even-bar" style="width: 50%;"></div>
+                            </div>
+                            <div class="split-labels">
+                                <span id="lbl-odd">홀수: 0</span>
+                                <span id="lbl-even">짝수: 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. High/Low Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(245, 158, 11, 0.1); color: var(--accent-warning);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 16 4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">고저 비율<span class="tooltip-icon" data-tooltip="로또의 절반 범위인 23을 기준으로, 1~22를 저수, 23~45를 고수로 규정한 비율입니다. 통계적으로 고르게 섞인 3:3, 2:4, 4:2 조합이 대부분입니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 3:3 / 2:4 / 4:2</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-highlow">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <div class="split-visualizer">
+                                <div class="split-segment low-side" id="low-bar" style="width: 50%;"></div>
+                                <div class="split-segment high-side" id="high-bar" style="width: 50%;"></div>
+                            </div>
+                            <div class="split-labels">
+                                <span id="lbl-low">저수: 0</span>
+                                <span id="lbl-high">고수: 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Prime Number Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(239, 68, 68, 0.1); color: var(--accent-error);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">소수 분석<span class="tooltip-icon" data-tooltip="1부터 45 범위 내의 소수(2, 3, 5, 7, 11... 등 총 14개)가 몇 개 포함되어 있는지 나타냅니다. 통계적으로 당첨 조합에는 소수가 1~3개 들어있는 경우가 80% 이상입니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 1 ~ 3개 포함</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-prime">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-value" id="val-prime">0개</span>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="progress-prime"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. 3-Division Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(255, 255, 255, 0.08); color: #fff;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">3분할 분석<span class="tooltip-icon" data-tooltip="1~45 범위를 3개 대역(1~15, 16~30, 31~45)으로 나눴을 때의 구간별 숫자 분포입니다. 한 구간에 5~6개가 몰리지 않고 고루 분산(최대 4개)되는 것이 이상적입니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 구간 편중 최소화</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-division">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <div class="division-visualizer">
+                                <div class="div-bar-wrap">
+                                    <div class="div-bar-fill" id="div-bar-1"></div>
+                                    <span class="div-bar-lbl">1~15</span>
+                                </div>
+                                <div class="div-bar-wrap">
+                                    <div class="div-bar-fill" id="div-bar-2"></div>
+                                    <span class="div-bar-lbl">16~30</span>
+                                </div>
+                                <div class="div-bar-wrap">
+                                    <div class="div-bar-fill" id="div-bar-3"></div>
+                                    <span class="div-bar-lbl">31~45</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Carryover & Neighbors (이월수/이웃수) - Informative Only -->
+                    <div class="metric-card" style="grid-column: 1 / -1;">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-success);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">이월수 및 이웃수 매칭<span class="tooltip-icon" data-tooltip="이월수(직전 당첨 번호와 같은 수)와 이웃수(직전 당첨 번호의 바로 앞/뒤 번호)의 개수입니다. 통계적으로 이월과 이웃수가 조합에 1~2개씩 섞여 자주 나옵니다.">ⓘ</span></span>
+                                    <span class="metric-target">설정된 직전 번호 대비 출현수</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-carry">정보</span>
+                        </div>
+                        <div class="metric-body" style="flex-direction: row; justify-content: space-between; font-size: 0.95rem; font-weight: 600;">
+                            <div id="val-carry">이월수: 0개 (직전 번호와 일치)</div>
+                            <div id="val-neighbor">이웃수: 0개 (직전 번호의 앞뒤 숫자)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom: Smart Generator Panel -->
+            <div class="panel-card generator-panel">
+                <div>
+                    <div class="panel-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.886L4.2 9.2l5.886 1.912L12 17l1.912-5.886L19.8 9.2l-5.886-1.912z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/></svg>
+                        스마트 필터링 조합 생성기
+                    </div>
+                    <p class="panel-desc">활성화한 통계 조건들을 모두 동시에 통과하는 번호 조합을 무작위 복원 추출법(Monte-Carlo)을 통해 자동으로 생성해 줍니다.</p>
+                </div>
+
+                <div class="filter-options-grid">
+                    <label class="filter-check-label">
+                        <input type="checkbox" id="filter-sum" checked>
+                        <span>총합 필터 (100 ~ 175)</span>
+                    </label>
+                    <label class="filter-check-label">
+                        <input type="checkbox" id="filter-ac" checked>
+                        <span>AC 복잡도 필터 (7 ~ 10)</span>
+                    </label>
+                    <label class="filter-check-label">
+                        <input type="checkbox" id="filter-oddeven" checked>
+                        <span>홀짝 균형 필터 (3:3, 2:4, 4:2)</span>
+                    </label>
+                    <label class="filter-check-label">
+                        <input type="checkbox" id="filter-highlow" checked>
+                        <span>고저 균형 필터 (3:3, 2:4, 4:2)</span>
+                    </label>
+                    <label class="filter-check-label">
+                        <input type="checkbox" id="filter-prime" checked>
+                        <span>소수 개수 필터 (1 ~ 3개)</span>
+                    </label>
+                    <label class="filter-check-label">
+                        <input type="checkbox" id="filter-division" checked>
+                        <span>3분할 쏠림 방지 필터 (구간당 최대 4개)</span>
+                    </label>
+                    <label class="filter-check-label">
+                        <input type="checkbox" id="filter-carry" checked>
+                        <span>이월수/이웃수 필터 (합계 1 ~ 3개 포함)</span>
+                    </label>
+                </div>
+
+                <div class="gen-action-area">
+                    <button class="btn btn-primary" onclick="generateCombination()" id="gen-btn">조건 충족 조합 생성하기</button>
+                </div>
+
+                <div id="generated-result-wrap" style="display: none;">
+                    <div class="generated-card">
+                        <h4>생성된 하모니 조합</h4>
+                        <div class="balls-row" id="generated-balls"></div>
+                        <div class="gen-meta" id="gen-meta-text">시도 횟수: 0회</div>
+                        <button class="btn btn-secondary" onclick="applyGeneratedNumbers()">이 조합을 선택판에 적용하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification-toast"></div>
+
+    <script>
+        const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43];
+        let selectedNumbers = [];
+        let generatedTempNumbers = [];
+
+        let currentGridFilter = 'all';
+
+        function setGridFilter(type) {
+            currentGridFilter = type;
+            
+            const chips = document.querySelectorAll('.filter-chip');
+            chips.forEach(chip => chip.classList.remove('active'));
+            
+            const activeChip = Array.from(chips).find(c => c.getAttribute('onclick').includes(`'${type}'`));
+            if (activeChip) activeChip.classList.add('active');
+            
+            const prevNums = getPrevDrawNumbers();
+            const neighborSet = new Set();
+            prevNums.forEach(n => {
+                if (n - 1 >= 1) neighborSet.add(n - 1);
+                if (n + 1 <= 45) neighborSet.add(n + 1);
+            });
+            prevNums.forEach(n => neighborSet.delete(n));
+
+            for (let i = 1; i <= 45; i++) {
+                const btn = document.getElementById(`numbtn-${i}`);
+                if (!btn) continue;
+                
+                let match = true;
+                if (type === 'odd') {
+                    match = (i % 2 !== 0);
+                } else if (type === 'even') {
+                    match = (i % 2 === 0);
+                } else if (type === 'prime') {
+                    match = PRIMES.includes(i);
+                } else if (type === 'multiple3') {
+                    match = (i % 3 === 0);
+                } else if (type === 'prevNeighbors') {
+                    match = neighborSet.has(i);
+                }
+                
+                if (match || type === 'all') {
+                    btn.classList.remove('dimmed');
+                } else {
+                    btn.classList.add('dimmed');
+                }
+            }
+        }
+
+        // Ininitialize Number Selection Board
+        function initBoard() {
+            const board = document.getElementById('number-board');
+            board.innerHTML = '';
+            for (let i = 1; i <= 45; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'number-btn';
+                btn.id = `numbtn-${i}`;
+                btn.textContent = i;
+                btn.onclick = () => toggleNumber(i);
+                board.appendChild(btn);
+            }
+            setGridFilter(currentGridFilter);
+            updateUI();
+        }
+
+        // Toggle Selection
+        function toggleNumber(num) {
+            const index = selectedNumbers.indexOf(num);
+            if (index > -1) {
+                selectedNumbers.splice(index, 1);
+                document.getElementById(`numbtn-${num}`).classList.remove('selected');
+            } else {
+                if (selectedNumbers.length >= 6) {
+                    showNotification("최대 6개의 번호만 선택 가능합니다.");
+                    return;
+                }
+                selectedNumbers.push(num);
+                document.getElementById(`numbtn-${num}`).classList.add('selected');
+            }
+            selectedNumbers.sort((a, b) => a - b);
+            updateUI();
+        }
+
+        // Get Previous Draw Numbers from Input
+        function getPrevDrawNumbers() {
+            const arr = [];
+            for (let i = 1; i <= 6; i++) {
+                const val = parseInt(document.getElementById(`prev-${i}`).value);
+                if (!isNaN(val) && val >= 1 && val <= 45) {
+                    arr.push(val);
+                }
+            }
+            return arr;
+        }
+
+        function validatePrevDrawInputs() {
+            const arr = getPrevDrawNumbers();
+            // check unique
+            const unique = new Set(arr);
+            if (unique.size !== 6 || arr.length !== 6) {
+                showNotification("직전 회차 번호는 1~45 사이의 중복 없는 6개 숫자여야 합니다.");
+            }
+            updateUI();
+        }
+
+        // Calculation Logic
+        function getACValue(nums) {
+            if (nums.length < 6) return 0;
+            const sorted = [...nums].sort((a, b) => a - b);
+            const diffs = new Set();
+            for (let i = 0; i < sorted.length; i++) {
+                for (let j = i + 1; j < sorted.length; j++) {
+                    diffs.add(sorted[j] - sorted[i]);
+                }
+            }
+            return diffs.size - (sorted.length - 1);
+        }
+
+        function getPrimeCount(nums) {
+            return nums.filter(n => PRIMES.includes(n)).length;
+        }
+
+        function getHighLowRatio(nums) {
+            const low = nums.filter(n => n <= 22).length;
+            const high = nums.filter(n => n >= 23).length;
+            return { low, high };
+        }
+
+        function getOddEvenRatio(nums) {
+            const odd = nums.filter(n => n % 2 !== 0).length;
+            const even = nums.filter(n => n % 2 === 0).length;
+            return { odd, even };
+        }
+
+        function get3DivisionDistribution(nums) {
+            const g1 = nums.filter(n => n <= 15).length;
+            const g2 = nums.filter(n => n >= 16 && n <= 30).length;
+            const g3 = nums.filter(n => n >= 31).length;
+            return { g1, g2, g3 };
+        }
+
+        function getPreviousDrawMatches(nums, prevNums) {
+            const carryOver = nums.filter(n => prevNums.includes(n));
+            
+            const neighborsSet = new Set();
+            prevNums.forEach(n => {
+                if (n - 1 >= 1) neighborsSet.add(n - 1);
+                if (n + 1 <= 45) neighborsSet.add(n + 1);
+            });
+            // remove direct matches
+            prevNums.forEach(n => neighborsSet.delete(n));
+            
+            const neighbors = nums.filter(n => neighborsSet.has(n));
+            
+            return { carryOver, neighbors };
+        }
+
+        // Get Lotto Ball Class
+        function getBallClass(num) {
+            if (num <= 10) return 'num-1-10';
+            if (num <= 20) return 'num-11-20';
+            if (num <= 30) return 'num-21-30';
+            if (num <= 40) return 'num-31-40';
+            return 'num-41-45';
+        }
+
+        // Update UI
+        function updateUI() {
+            // Update Selected Balls Row
+            const ballsContainer = document.getElementById('selected-balls');
+            ballsContainer.innerHTML = '';
+            for (let i = 0; i < 6; i++) {
+                if (i < selectedNumbers.length) {
+                    const num = selectedNumbers[i];
+                    const ball = document.createElement('div');
+                    ball.className = `ball ${getBallClass(num)}`;
+                    ball.textContent = num;
+                    ballsContainer.appendChild(ball);
+                } else {
+                    const placeholder = document.createElement('div');
+                    placeholder.className = 'ball-placeholder';
+                    placeholder.textContent = '?';
+                    ballsContainer.appendChild(placeholder);
+                }
+            }
+
+            // Sync Board button selections
+            for (let i = 1; i <= 45; i++) {
+                const btn = document.getElementById(`numbtn-${i}`);
+                if (btn) {
+                    if (selectedNumbers.includes(i)) {
+                        btn.classList.add('selected');
+                    } else {
+                        btn.classList.remove('selected');
+                    }
+                }
+            }
+
+            setGridFilter(currentGridFilter);
+
+            if (selectedNumbers.length < 6) {
+                // Clear Dashboard Metrics
+                resetDashboard();
+                return;
+            }
+
+            // Perform statistical calculations
+            const sum = selectedNumbers.reduce((a, b) => a + b, 0);
+            const ac = getACValue(selectedNumbers);
+            const { odd, even } = getOddEvenRatio(selectedNumbers);
+            const { low, high } = getHighLowRatio(selectedNumbers);
+            const primeCount = getPrimeCount(selectedNumbers);
+            const { g1, g2, g3 } = get3DivisionDistribution(selectedNumbers);
+            const prevNums = getPrevDrawNumbers();
+            const { carryOver, neighbors } = getPreviousDrawMatches(selectedNumbers, prevNums);
+
+            // Scoring variables
+            let score = 0;
+
+            // 1. Sum
+            const sumPass = sum >= 100 && sum <= 175;
+            score += sumPass ? 20 : ( (sum >= 90 && sum < 100) || (sum > 175 && sum <= 185) ? 10 : 0 );
+            const statusSum = document.getElementById('status-sum');
+            statusSum.textContent = sumPass ? "합격" : "불합격";
+            statusSum.className = `status-badge ${sumPass ? 'pass' : 'fail'}`;
+            document.getElementById('val-sum').textContent = `${sum}`;
+            document.getElementById('progress-sum').style.width = `${Math.min(100, Math.max(0, (sum / 255) * 100))}%`;
+
+            // 2. AC
+            const acPass = ac >= 7 && ac <= 10;
+            score += acPass ? 20 : (ac === 6 ? 10 : 0);
+            const statusAC = document.getElementById('status-ac');
+            statusAC.textContent = acPass ? "합격" : "불합격";
+            statusAC.className = `status-badge ${acPass ? 'pass' : 'fail'}`;
+            document.getElementById('val-ac').textContent = `${ac}`;
+            document.getElementById('progress-ac').style.width = `${(ac / 10) * 100}%`;
+
+            // 3. Odd/Even
+            const oddRatioStr = `${odd}:${even}`;
+            const oddPass = oddRatioStr === '3:3' || oddRatioStr === '2:4' || oddRatioStr === '4:2';
+            score += oddRatioStr === '3:3' ? 20 : (oddPass ? 15 : 0);
+            const statusOdd = document.getElementById('status-oddeven');
+            statusOdd.textContent = oddPass ? "균형" : "불균형";
+            statusOdd.className = `status-badge ${oddPass ? 'pass' : 'fail'}`;
+            document.getElementById('odd-bar').style.width = `${(odd / 6) * 100}%`;
+            document.getElementById('even-bar').style.width = `${(even / 6) * 100}%`;
+            document.getElementById('lbl-odd').textContent = `홀수: ${odd}`;
+            document.getElementById('lbl-even').textContent = `짝수: ${even}`;
+
+            // 4. High/Low
+            const hlRatioStr = `${low}:${high}`;
+            const hlPass = hlRatioStr === '3:3' || hlRatioStr === '2:4' || hlRatioStr === '4:2';
+            score += hlRatioStr === '3:3' ? 15 : (hlPass ? 10 : 0);
+            const statusHL = document.getElementById('status-highlow');
+            statusHL.textContent = hlPass ? "균형" : "불균형";
+            statusHL.className = `status-badge ${hlPass ? 'pass' : 'fail'}`;
+            document.getElementById('low-bar').style.width = `${(low / 6) * 100}%`;
+            document.getElementById('high-bar').style.width = `${(high / 6) * 100}%`;
+            document.getElementById('lbl-low').textContent = `저수: ${low}`;
+            document.getElementById('lbl-high').textContent = `고수: ${high}`;
+
+            // 5. Prime
+            const primePass = primeCount >= 1 && primeCount <= 3;
+            score += primePass ? 15 : (primeCount === 0 || primeCount === 4 ? 5 : 0);
+            const statusPrime = document.getElementById('status-prime');
+            statusPrime.textContent = primePass ? "적정" : "미달/초과";
+            statusPrime.className = `status-badge ${primePass ? 'pass' : 'fail'}`;
+            const primesSelected = selectedNumbers.filter(n => PRIMES.includes(n));
+            document.getElementById('val-prime').textContent = `${primeCount}개 (${primesSelected.join(', ') || '없음'})`;
+            document.getElementById('progress-prime').style.width = `${(primeCount / 6) * 100}%`;
+
+            // 6. 3-Division
+            const divPass = g1 <= 4 && g2 <= 4 && g3 <= 4;
+            score += divPass ? 10 : 0;
+            const statusDiv = document.getElementById('status-division');
+            statusDiv.textContent = divPass ? "안정" : "편중";
+            statusDiv.className = `status-badge ${divPass ? 'pass' : 'fail'}`;
+            document.getElementById('div-bar-1').style.height = `${(g1 / 6) * 100}%`;
+            document.getElementById('div-bar-2').style.height = `${(g2 / 6) * 100}%`;
+            document.getElementById('div-bar-3').style.height = `${(g3 / 6) * 100}%`;
+
+            // 7. Carryover & Neighbors Info
+            document.getElementById('val-carry').textContent = `이월수: ${carryOver.length}개 (${carryOver.join(', ') || '없음'})`;
+            document.getElementById('val-neighbor').textContent = `이웃수: ${neighbors.length}개 (${neighbors.join(', ') || '없음'})`;
+            const statusCarry = document.getElementById('status-carry');
+            if (carryOver.length >= 1 && carryOver.length <= 2) {
+                statusCarry.textContent = "표준";
+                statusCarry.className = "status-badge pass";
+            } else {
+                statusCarry.textContent = "참고";
+                statusCarry.className = "status-badge neutral";
+            }
+
+            // Update Harmony Score Ring & Text
+            const scoreValEl = document.getElementById('score-val');
+            const scoreGradeEl = document.getElementById('score-grade');
+            const progressRing = document.getElementById('score-progress');
+            
+            // Animation for score
+            animateScoreValue(0, score);
+
+            // DashOffset animation
+            const circumference = 377; // 2 * pi * r (r=60)
+            const offset = circumference - (score / 100) * circumference;
+            progressRing.style.strokeDashoffset = offset;
+
+            // Set Grade Text
+            if (score >= 90) {
+                scoreGradeEl.textContent = "황금 조화";
+                scoreGradeEl.style.color = "var(--accent-success)";
+                scoreGradeEl.style.background = "rgba(16, 185, 129, 0.1)";
+            } else if (score >= 70) {
+                scoreGradeEl.textContent = "우수 조합";
+                scoreGradeEl.style.color = "var(--accent-primary)";
+                scoreGradeEl.style.background = "rgba(99, 102, 241, 0.1)";
+            } else if (score >= 50) {
+                scoreGradeEl.textContent = "보통 조합";
+                scoreGradeEl.style.color = "var(--accent-warning)";
+                scoreGradeEl.style.background = "rgba(245, 158, 11, 0.1)";
+            } else {
+                scoreGradeEl.textContent = "불균형 조합";
+                scoreGradeEl.style.color = "var(--accent-error)";
+                scoreGradeEl.style.background = "rgba(239, 68, 68, 0.1)";
+            }
+        }
+
+        // Animate Score Counter
+        function animateScoreValue(start, end) {
+            const duration = 800;
+            const scoreValEl = document.getElementById('score-val');
+            let startTime = null;
+
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                const current = Math.floor(progress * (end - start) + start);
+                scoreValEl.textContent = current;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    scoreValEl.textContent = end;
+                }
+            }
+            window.requestAnimationFrame(step);
+        }
+
+        function resetDashboard() {
+            document.getElementById('score-val').textContent = '0';
+            const scoreGradeEl = document.getElementById('score-grade');
+            scoreGradeEl.textContent = '준비 대기';
+            scoreGradeEl.style.color = 'var(--text-muted)';
+            scoreGradeEl.style.background = 'rgba(255, 255, 255, 0.05)';
+            document.getElementById('score-progress').style.strokeDashoffset = 377;
+
+            // Reset cards
+            const badges = ['sum', 'ac', 'oddeven', 'highlow', 'prime', 'division'];
+            badges.forEach(id => {
+                const b = document.getElementById(`status-${id}`);
+                b.textContent = "대기";
+                b.className = "status-badge neutral";
+            });
+
+            document.getElementById('val-sum').textContent = '0';
+            document.getElementById('progress-sum').style.width = '0%';
+            document.getElementById('val-ac').textContent = '0';
+            document.getElementById('progress-ac').style.width = '0%';
+            
+            document.getElementById('odd-bar').style.width = '50%';
+            document.getElementById('even-bar').style.width = '50%';
+            document.getElementById('lbl-odd').textContent = '홀수: 0';
+            document.getElementById('lbl-even').textContent = '짝수: 0';
+
+            document.getElementById('low-bar').style.width = '50%';
+            document.getElementById('high-bar').style.width = '50%';
+            document.getElementById('lbl-low').textContent = '저수: 0';
+            document.getElementById('lbl-high').textContent = '고수: 0';
+
+            document.getElementById('val-prime').textContent = '0개';
+            document.getElementById('progress-prime').style.width = '0%';
+
+            document.getElementById('div-bar-1').style.height = '0%';
+            document.getElementById('div-bar-2').style.height = '0%';
+            document.getElementById('div-bar-3').style.height = '0%';
+
+            document.getElementById('val-carry').textContent = '이월수: 0개';
+            document.getElementById('val-neighbor').textContent = '이웃수: 0개';
+            document.getElementById('status-carry').textContent = '정보';
+            document.getElementById('status-carry').className = 'status-badge neutral';
+        }
+
+        // Custom Toast Notification
+        function showNotification(msg) {
+            const toast = document.getElementById('notification');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // SMART COMBINATION GENERATOR (Monte-Carlo method)
+        function generateCombination() {
+            const prevNums = getPrevDrawNumbers();
+            
+            const filters = {
+                sum: document.getElementById('filter-sum').checked,
+                ac: document.getElementById('filter-ac').checked,
+                oddeven: document.getElementById('filter-oddeven').checked,
+                highlow: document.getElementById('filter-highlow').checked,
+                prime: document.getElementById('filter-prime').checked,
+                division: document.getElementById('filter-division').checked,
+                carry: document.getElementById('filter-carry').checked
+            };
+
+            let attempts = 0;
+            const maxAttempts = 15000;
+            let found = false;
+            let combo = [];
+
+            while (attempts < maxAttempts && !found) {
+                attempts++;
+                combo = [];
+                // Pick 6 unique random numbers
+                while (combo.length < 6) {
+                    const r = Math.floor(Math.random() * 45) + 1;
+                    if (!combo.includes(r)) {
+                        combo.push(r);
+                    }
+                }
+                combo.sort((a, b) => a - b);
+
+                // Check against active filters
+                let pass = true;
+
+                if (filters.sum) {
+                    const sum = combo.reduce((a, b) => a + b, 0);
+                    if (sum < 100 || sum > 175) pass = false;
+                }
+                if (pass && filters.ac) {
+                    const ac = getACValue(combo);
+                    if (ac < 7 || ac > 10) pass = false;
+                }
+                if (pass && filters.oddeven) {
+                    const { odd, even } = getOddEvenRatio(combo);
+                    const oddRatioStr = `${odd}:${even}`;
+                    if (oddRatioStr !== '3:3' && oddRatioStr !== '2:4' && oddRatioStr !== '4:2') pass = false;
+                }
+                if (pass && filters.highlow) {
+                    const { low, high } = getHighLowRatio(combo);
+                    const hlRatioStr = `${low}:${high}`;
+                    if (hlRatioStr !== '3:3' && hlRatioStr !== '2:4' && hlRatioStr !== '4:2') pass = false;
+                }
+                if (pass && filters.prime) {
+                    const primeCount = getPrimeCount(combo);
+                    if (primeCount < 1 || primeCount > 3) pass = false;
+                }
+                if (pass && filters.division) {
+                    const { g1, g2, g3 } = get3DivisionDistribution(combo);
+                    if (g1 > 4 || g2 > 4 || g3 > 4) pass = false;
+                }
+                if (pass && filters.carry) {
+                    const { carryOver, neighbors } = getPreviousDrawMatches(combo, prevNums);
+                    const totalMatches = carryOver.length + neighbors.length;
+                    if (totalMatches < 1 || totalMatches > 3) pass = false;
+                }
+
+                if (pass) {
+                    found = true;
+                }
+            }
+
+            if (found) {
+                generatedTempNumbers = [...combo];
+                displayGeneratedResult(combo, attempts);
+                showNotification(`필터를 만족하는 번호를 ${attempts}회 시도 끝에 찾았습니다!`);
+            } else {
+                showNotification("조건을 만족하는 조합을 찾지 못했습니다. 필터를 줄이거나 조정해 주세요.");
+            }
+        }
+
+        function displayGeneratedResult(combo, attempts) {
+            const container = document.getElementById('generated-balls');
+            container.innerHTML = '';
+            
+            combo.forEach(num => {
+                const ball = document.createElement('div');
+                ball.className = `ball ${getBallClass(num)}`;
+                ball.textContent = num;
+                container.appendChild(ball);
+            });
+
+            document.getElementById('gen-meta-text').textContent = `시뮬레이션 시도 횟수: ${attempts}회`;
+            document.getElementById('generated-result-wrap').style.display = 'block';
+        }
+
+        function applyGeneratedNumbers() {
+            if (generatedTempNumbers.length === 6) {
+                selectedNumbers = [...generatedTempNumbers];
+                
+                // Redraw active grid selections
+                for (let i = 1; i <= 45; i++) {
+                    const btn = document.getElementById(`numbtn-${i}`);
+                    if (btn) {
+                        if (selectedNumbers.includes(i)) {
+                            btn.classList.add('selected');
+                        } else {
+                            btn.classList.remove('selected');
+                        }
+                    }
+                }
+
+                updateUI();
+                showNotification("생성된 조합을 번호판에 등록하여 상세 분석을 수행합니다!");
+            }
+        }
+
+        // Start Board Init
+        window.onload = initBoard;
+
+        // Global Tooltip Engine for Always-On-Top Rendering (Bypasses overflow:hidden limitations)
+        (function() {
+            const tooltipEl = document.createElement('div');
+            tooltipEl.id = 'global-tooltip';
+            tooltipEl.style.cssText = `
+                position: fixed;
+                background: rgba(15, 23, 42, 0.98);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                color: #fff;
+                padding: 8px 12px;
+                border-radius: 8px;
+                font-size: 0.75rem;
+                font-weight: 500;
+                line-height: 1.45;
+                width: 240px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+                z-index: 99999;
+                display: none;
+                pointer-events: none;
+                opacity: 0;
+                transform: translate(-50%, -10px);
+                transition: opacity 0.15s, transform 0.15s;
+                text-align: left;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            document.body.appendChild(tooltipEl);
+
+            let activeTarget = null;
+
+            document.addEventListener('mouseover', (e) => {
+                const target = e.target.closest('[data-tooltip]');
+                if (target) {
+                    activeTarget = target;
+                    const text = target.getAttribute('data-tooltip');
+                    tooltipEl.textContent = text;
+                    tooltipEl.style.display = 'block';
+                    
+                    requestAnimationFrame(() => {
+                        if (activeTarget !== target) return;
+                        const rect = target.getBoundingClientRect();
+                        let x = rect.left + rect.width / 2;
+                        let y = rect.top - 8;
+                        
+                        const tooltipWidth = tooltipEl.offsetWidth;
+                        const tooltipHeight = tooltipEl.offsetHeight;
+                        
+                        if (x - tooltipWidth / 2 < 10) {
+                            x = tooltipWidth / 2 + 10;
+                        } else if (x + tooltipWidth / 2 > window.innerWidth - 10) {
+                            x = window.innerWidth - tooltipWidth / 2 - 10;
+                        }
+                        
+                        if (y - tooltipHeight < 10) {
+                            y = rect.bottom + 8;
+                            tooltipEl.style.transform = 'translate(-50%, 0)';
+                            tooltipEl.style.top = y + 'px';
+                        } else {
+                            y = rect.top - 8;
+                            tooltipEl.style.transform = 'translate(-50%, -100%)';
+                            tooltipEl.style.top = y + 'px';
+                        }
+                        
+                        tooltipEl.style.left = x + 'px';
+                        tooltipEl.style.opacity = '1';
+                    });
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                const target = e.target.closest('[data-tooltip]');
+                if (target && activeTarget === target) {
+                    activeTarget = null;
+                    tooltipEl.style.opacity = '0';
+                    tooltipEl.style.display = 'none';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

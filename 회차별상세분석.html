@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=device-width, initial-scale=1.0">
+    <title>회차별 상세 분석 | LOTTO STATS DECK</title>
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #1e293b;
+            --accent-primary: #6366f1;   /* Indigo */
+            --accent-secondary: #a855f7; /* Purple */
+            --accent-success: #10b981;   /* Emerald */
+            --accent-warning: #f59e0b;   /* Amber */
+            --accent-error: #ef4444;     /* Rose */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(30, 41, 59, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at top right, #1e1b4b, var(--bg-primary) 60%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 50px;
+        }
+
+        header {
+            text-align: center;
+            margin: 40px 0 35px 0;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 40%, var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        /* Navigation Tab Bar */
+        .nav-bar {
+            display: flex;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 25px;
+            gap: 4px;
+        }
+
+        .nav-link {
+            flex: 1;
+            text-align: center;
+            padding: 12px 15px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link.active {
+            color: #fff;
+            background: var(--accent-primary);
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+
+        /* File Dropzone (Fallback) */
+        .dropzone {
+            background: var(--glass-bg);
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+            margin-bottom: 25px;
+        }
+
+        .dropzone.dragover {
+            border-color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .dropzone-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .dropzone-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            margin-bottom: 4px;
+        }
+
+        .dropzone-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Round Inspector Panel */
+        .inspector-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Selector Bar */
+        .selector-bar-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .selector-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-nav {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .btn-nav:hover:not(:disabled) {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .form-control {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            outline: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 8px rgba(99, 102, 241, 0.2);
+        }
+
+        .draw-date-lbl {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Detail Dashboard Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 992px) {
+            .dashboard-grid {
+                grid-template-columns: 1.2fr 2fr;
+            }
+        }
+
+        /* Left Side Card: Focus details */
+        .focus-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .balls-display-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 12px;
+        }
+
+        /* Large Lotto Balls Row */
+        .balls-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .ball {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4), 
+                        inset 0 -4px 8px rgba(0,0,0,0.2), 
+                        inset 0 4px 8px rgba(255,255,255,0.2);
+            position: relative;
+        }
+
+        .ball-placeholder {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .bonus-divider {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin: 0 4px;
+        }
+
+        /* Lotto Ball Colors */
+        .num-1-10   { background: radial-gradient(circle at 30% 30%, #facc15, #ca8a04); } /* Yellow */
+        .num-11-20  { background: radial-gradient(circle at 30% 30%, #60a5fa, #2563eb); } /* Blue */
+        .num-21-30  { background: radial-gradient(circle at 30% 30%, #f87171, #dc2626); } /* Red */
+        .num-31-40  { background: radial-gradient(circle at 30% 30%, #94a3b8, #475569); } /* Gray */
+        .num-41-45  { background: radial-gradient(circle at 30% 30%, #4ade80, #16a34a); } /* Green */
+
+        .bonus-ball {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Circle Progress Ring */
+        .gauge-wrapper {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin-bottom: 20px;
+        }
+
+        .gauge-svg {
+            transform: rotate(-90deg);
+        }
+
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.03);
+            stroke-width: 10;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke: url(#scoreGradient);
+            stroke-width: 10;
+            stroke-dasharray: 377; /* 2 * pi * r (r=60) */
+            stroke-dashoffset: 377;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .gauge-text {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gauge-score {
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .gauge-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .grade-badge {
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-top: 5px;
+        }
+
+        /* Right Side: Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            content-visibility: auto;
+        }
+
+        @media (min-width: 576px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .metric-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(99, 102, 241, 0.25);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.12);
+        }
+
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .metric-icon-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .metric-icon-wrap {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metric-title-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-name {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+        }
+
+        .metric-target {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 1px;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .status-badge.pass {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--accent-success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-badge.fail {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--accent-error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .status-badge.neutral {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .metric-body {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Progress bars inside cards */
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Split bars */
+        .split-visualizer {
+            display: flex;
+            height: 6px;
+            width: 100%;
+            border-radius: 3px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+            margin-top: 4px;
+        }
+
+        .split-segment {
+            height: 100%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .split-segment.low-side {
+            background: var(--accent-primary);
+        }
+
+        .split-segment.high-side {
+            background: var(--accent-secondary);
+        }
+
+        .split-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* 3-Division distribution bars */
+        .division-visualizer {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+            width: 100%;
+        }
+
+        .div-bar-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .div-bar-fill {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .div-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; height: 100%;
+            background: var(--accent-primary);
+            width: 0%;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 3px;
+        }
+
+        #div-bar-1::after { background: var(--accent-success); }
+        #div-bar-2::after { background: var(--accent-warning); }
+        #div-bar-3::after { background: var(--accent-secondary); }
+
+        .div-bar-lbl {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Tooltip Marker styles */
+        [data-tooltip] {
+            position: relative;
+        }
+
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            font-size: 0.62rem;
+            margin-left: 4px;
+            font-weight: 700;
+            cursor: help;
+            vertical-align: middle;
+            transition: all 0.2s;
+        }
+
+        .tooltip-icon:hover {
+            background: var(--accent-primary);
+            color: #fff;
+        }
+
+        /* Spinner Overlay */
+        .spinner-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(11, 15, 25, 0.85);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(99, 102, 241, 0.1);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <svg width="0" height="0" style="position: absolute; width: 0; height: 0; overflow: hidden;">
+        <defs>
+            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#10b981" />
+                <stop offset="50%" stop-color="#6366f1" />
+                <stop offset="100%" stop-color="#a855f7" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="container">
+        <header>
+            <h1>회차별 상세 분석</h1>
+            <div class="subtitle">역대 당첨 이력을 1회차 단위로 정밀 추적하여 조화성 지수를 검증합니다.</div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link">홈</a>
+            <a href="LOTTO STATS DECK.html" class="nav-link">실시간 분석 및 스마트 생성기</a>
+            <a href="역대통계분석.html" class="nav-link">역대 전체 대시보드</a>
+            <a href="회차별상세분석.html" class="nav-link active">회차별 상세 분석</a>
+        </nav>
+
+        <!-- Dropzone for local file loads (Fallback) -->
+        <div id="dropzone" class="dropzone" style="display: none;">
+            <div class="dropzone-icon">📥</div>
+            <div class="dropzone-text" id="dropzone-title">lotto_history.csv 파일을 로드하는 중...</div>
+            <div class="dropzone-sub" id="dropzone-sub">기본 경로에서 자동 조회를 시도하고 있습니다.</div>
+            <input type="file" id="file-input" style="display: none;" accept=".csv">
+        </div>
+
+        <!-- Inspector View (Visible only after data loads) -->
+        <div class="inspector-panel" id="inspector-section" style="display: none;">
+            
+            <!-- Selector Row Card -->
+            <div class="selector-bar-card">
+                <div class="selector-controls">
+                    <button class="btn-nav" id="btn-prev-round" onclick="navigateRound(-1)">◀ 이전 회차</button>
+                    <select id="round-select" class="form-control" style="width: 140px; text-align-last: center;" onchange="handleRoundSelectChange()"></select>
+                    <button class="btn-nav" id="btn-next-round" onclick="navigateRound(1)">다음 회차 ▶</button>
+                </div>
+                <div class="draw-date-lbl" id="draw-date-text">추첨일: -</div>
+            </div>
+
+            <!-- Detail Grid Layout -->
+            <div class="dashboard-grid">
+                
+                <!-- Left Focus Card: Balls & SVG Gauge -->
+                <div class="focus-card">
+                    <div class="balls-display-title">당첨 번호 조합</div>
+                    <div class="balls-row" id="winning-balls-row">
+                        <!-- balls injected dynamically -->
+                    </div>
+
+                    <div class="gauge-wrapper">
+                        <svg class="gauge-svg" width="160" height="160" viewBox="0 0 140 140">
+                            <circle class="gauge-bg" cx="70" cy="70" r="60"></circle>
+                            <circle class="gauge-fill" id="gauge-score-ring" cx="70" cy="70" r="60"></circle>
+                        </svg>
+                        <div class="gauge-text">
+                            <span class="gauge-score" id="gauge-score-val">0</span>
+                            <span class="gauge-label">조화지수</span>
+                        </div>
+                    </div>
+
+                    <div class="grade-badge" id="gauge-grade-badge" style="background: rgba(255,255,255,0.05); color: #fff;">대기</div>
+                </div>
+
+                <!-- Right Side: Statistical Cards -->
+                <div class="metrics-grid">
+                    
+                    <!-- 1. Sum Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(99, 102, 241, 0.1); color: var(--accent-primary);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19V5"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">총합 분석<span class="tooltip-icon" data-tooltip="6개 번호의 합계입니다. 역대 로또 당첨 조합의 약 73%는 합계가 100~175 사이의 황금구간에 분포해 있습니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 100 ~ 175</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-sum">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-value" id="val-sum">0</span>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="progress-sum"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. AC Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(168, 85, 247, 0.1); color: var(--accent-secondary);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">AC 복잡도<span class="tooltip-icon" data-tooltip="산술적 복잡도 수치입니다. 6개 번호의 모든 가능한 차이값(총 15개) 중 고유한 차이 개수에서 5를 뺀 값으로, 실제 당첨 조합은 AC=7~10 범위인 경우가 90% 이상입니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 7 ~ 10</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-ac">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-value" id="val-ac">0</span>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="progress-ac"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Odd/Even Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-success);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 12h14"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">홀짝 비율<span class="tooltip-icon" data-tooltip="홀수와 짝수의 배분 비율입니다. 6개 모두 홀수이거나 짝수인 극단적인 분포는 제외하고, 3:3, 2:4, 4:2의 균형 잡힌 비율(역대 당첨률 80% 이상)을 권장합니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 3:3 / 2:4 / 4:2</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-oddeven">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <div class="split-visualizer">
+                                <div class="split-segment low-side" id="odd-bar" style="width: 50%;"></div>
+                                <div class="split-segment high-side" id="even-bar" style="width: 50%;"></div>
+                            </div>
+                            <div class="split-labels">
+                                <span id="lbl-odd">홀수: 0</span>
+                                <span id="lbl-even">짝수: 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. High/Low Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(245, 158, 11, 0.1); color: var(--accent-warning);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 16 4 4 4-4M7 20V4M21 8l-4-4-4 4M17 4v16"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">고저 비율<span class="tooltip-icon" data-tooltip="로또의 절반 범위인 23을 기준으로, 1~22를 저수, 23~45를 고수로 규정한 비율입니다. 통계적으로 고르게 섞인 3:3, 2:4, 4:2 조합이 대부분입니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 3:3 / 2:4 / 4:2</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-highlow">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <div class="split-visualizer">
+                                <div class="split-segment low-side" id="low-bar" style="width: 50%;"></div>
+                                <div class="split-segment high-side" id="high-bar" style="width: 50%;"></div>
+                            </div>
+                            <div class="split-labels">
+                                <span id="lbl-low">저수(1~22): 0</span>
+                                <span id="lbl-high">고수(23~45): 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Prime Number Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(239, 68, 68, 0.1); color: var(--accent-error);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">소수 분석<span class="tooltip-icon" data-tooltip="1부터 45 범위 내의 소수(2, 3, 5, 7, 11... 등 총 14개)가 몇 개 포함되어 있는지 나타냅니다. 통계적으로 당첨 조합에는 소수가 1~3개 들어있는 경우가 80% 이상입니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 1 ~ 3개 포함</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-prime">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <span class="metric-value" id="val-prime">0개</span>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="progress-prime"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. 3-Division Card -->
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(255, 255, 255, 0.08); color: #fff;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">3분할 분석<span class="tooltip-icon" data-tooltip="1~45 범위를 3개 대역(1~15, 16~30, 31~45)으로 나눴을 때의 구간별 숫자 분포입니다. 한 구간에 5~6개가 몰리지 않고 고루 분산(최대 4개)되는 것이 이상적입니다.">ⓘ</span></span>
+                                    <span class="metric-target">목표: 구간 편중 최소화</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-division">대기</span>
+                        </div>
+                        <div class="metric-body">
+                            <div class="division-visualizer">
+                                <div class="div-bar-wrap">
+                                    <div class="div-bar-fill" id="div-bar-1"></div>
+                                    <span class="div-bar-lbl">1~15</span>
+                                </div>
+                                <div class="div-bar-wrap">
+                                    <div class="div-bar-fill" id="div-bar-2"></div>
+                                    <span class="div-bar-lbl">16~30</span>
+                                </div>
+                                <div class="div-bar-wrap">
+                                    <div class="div-bar-fill" id="div-bar-3"></div>
+                                    <span class="div-bar-lbl">31~45</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Carryover & Neighbors (이월수/이웃수) - Dynamic Calculations -->
+                    <div class="metric-card" style="grid-column: 1 / -1;">
+                        <div class="metric-header">
+                            <div class="metric-icon-title">
+                                <div class="metric-icon-wrap" style="background: rgba(16, 185, 129, 0.1); color: var(--accent-success);">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                                </div>
+                                <div class="metric-title-group">
+                                    <span class="metric-name">이월수 및 이웃수 매칭<span class="tooltip-icon" data-tooltip="이월수(직전 당첨 번호와 같은 수)와 이웃수(직전 당첨 번호의 바로 앞/뒤 번호)의 개수입니다. 통계적으로 이월과 이웃수가 조합에 1~2개씩 섞여 자주 나옵니다.">ⓘ</span></span>
+                                    <span class="metric-target" id="prev-round-reference-lbl">직전 회차 대비 출현 분석</span>
+                                </div>
+                            </div>
+                            <span class="status-badge neutral" id="status-carry">정보</span>
+                        </div>
+                        <div class="metric-body" style="flex-direction: row; justify-content: space-between; font-size: 0.95rem; font-weight: 600; flex-wrap: wrap; gap: 10px;">
+                            <div id="val-carry">이월수: 0개 (-)</div>
+                            <div id="val-neighbor">이웃수: 0개 (-)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spinner Loading -->
+    <div class="spinner-overlay" id="loading-spinner">
+        <div class="spinner"></div>
+        <p style="font-weight: 600; color: #fff; letter-spacing: 0.5px;">역대 로또 당첨 데이터 가공 중...</p>
+    </div>
+
+    <script>
+        const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43];
+        let originalRecords = []; // Raw CSV records
+        let roundsMap = new Map(); // round -> record mappings for easy direct lookups
+        let sortedRoundNumbers = []; // list of round numbers sorted descending
+        let currentRound = null;
+
+        // Custom Papaparse-free CSV Parser
+        function parseCSV(text) {
+            const lines = text.split(/\r?\n/);
+            if (lines.length === 0) return [];
+            
+            let headerLine = lines[0];
+            if (headerLine.charCodeAt(0) === 0xFEFF) {
+                headerLine = headerLine.substring(1);
+            }
+            
+            const headers = headerLine.split(',').map(h => h.trim());
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const values = line.split(',').map(v => v.trim());
+                if (values.length !== headers.length) continue;
+                
+                const row = {};
+                headers.forEach((h, index) => {
+                    row[h] = values[index];
+                });
+                data.push(row);
+            }
+            return data;
+        }
+
+        // Statistical calculations
+        function getACValue(nums) {
+            const sorted = [...nums].sort((a, b) => a - b);
+            const diffs = new Set();
+            for (let i = 0; i < sorted.length; i++) {
+                for (let j = i + 1; j < sorted.length; j++) {
+                    diffs.add(sorted[j] - sorted[i]);
+                }
+            }
+            return diffs.size - (sorted.length - 1);
+        }
+
+        function getPrimeCount(nums) {
+            return nums.filter(n => PRIMES.includes(n)).length;
+        }
+
+        function getHighLowRatio(nums) {
+            const low = nums.filter(n => n <= 22).length;
+            const high = nums.filter(n => n >= 23).length;
+            return { low, high };
+        }
+
+        function getOddEvenRatio(nums) {
+            const odd = nums.filter(n => n % 2 !== 0).length;
+            const even = nums.filter(n => n % 2 === 0).length;
+            return { odd, even };
+        }
+
+        function get3DivisionDistribution(nums) {
+            const g1 = nums.filter(n => n <= 15).length;
+            const g2 = nums.filter(n => n >= 16 && n <= 30).length;
+            const g3 = nums.filter(n => n >= 31).length;
+            return { g1, g2, g3 };
+        }
+
+        function getPreviousDrawMatches(nums, prevNums) {
+            if (!prevNums || prevNums.length === 0) return { carryOver: [], neighbors: [] };
+            
+            const carryOver = nums.filter(n => prevNums.includes(n));
+            
+            const neighborsSet = new Set();
+            prevNums.forEach(n => {
+                if (n - 1 >= 1) neighborsSet.add(n - 1);
+                if (n + 1 <= 45) neighborsSet.add(n + 1);
+            });
+            // remove direct matches
+            prevNums.forEach(n => neighborsSet.delete(n));
+            
+            const neighbors = nums.filter(n => neighborsSet.has(n));
+            
+            return { carryOver, neighbors };
+        }
+
+        function getBallClass(num) {
+            if (num <= 10) return 'num-1-10';
+            if (num <= 20) return 'num-11-20';
+            if (num <= 30) return 'num-21-30';
+            if (num <= 40) return 'num-31-40';
+            return 'num-41-45';
+        }
+
+        // Auto loader initialization
+        function initLoader() {
+            const dropzone = document.getElementById('dropzone');
+            const fileInput = document.getElementById('file-input');
+
+            // Set up local file selection handlers
+            dropzone.onclick = () => fileInput.click();
+            fileInput.onchange = handleFileSelect;
+
+            dropzone.ondragover = (e) => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            };
+            dropzone.ondragleave = () => {
+                dropzone.classList.remove('dragover');
+            };
+            dropzone.ondrop = handleFileDrop;
+
+            // Attempt auto fetch
+            fetch('lotto_history.csv')
+                .then(res => {
+                    if (!res.ok) throw new Error("Auto load failed");
+                    return res.text();
+                })
+                .then(text => {
+                    originalRecords = parseCSV(text);
+                    if (originalRecords.length > 0) {
+                        processRecords(originalRecords);
+                    } else {
+                        showDropzone();
+                    }
+                })
+                .catch(err => {
+                    console.log("CORS/Fetch restriction detected. Showing dropzone fallback.", err);
+                    showDropzone();
+                });
+        }
+
+        function showDropzone() {
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('dropzone').style.display = 'block';
+            document.getElementById('dropzone-title').textContent = "lotto_history.csv 파일을 여기에 드롭하거나 클릭하세요.";
+            document.getElementById('dropzone-sub').textContent = "로컬 브라우저 보안 규정(CORS)으로 자동 불러오기가 제한되었습니다.";
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) loadFile(file);
+        }
+
+        function handleFileDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropzone').classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) loadFile(file);
+        }
+
+        function loadFile(file) {
+            document.getElementById('loading-spinner').style.display = 'flex';
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                originalRecords = parseCSV(text);
+                if (originalRecords.length > 0) {
+                    document.getElementById('dropzone').style.display = 'none';
+                    processRecords(originalRecords);
+                } else {
+                    alert("유효한 로또 CSV 데이터가 아닙니다.");
+                    document.getElementById('loading-spinner').style.display = 'none';
+                }
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        // Process data
+        function processRecords(records) {
+            roundsMap.clear();
+            sortedRoundNumbers = [];
+
+            records.forEach(row => {
+                const ep = parseInt(row['회차']);
+                if (isNaN(ep)) return;
+                
+                const nums = [
+                    parseInt(row['번호1']),
+                    parseInt(row['번호2']),
+                    parseInt(row['번호3']),
+                    parseInt(row['번호4']),
+                    parseInt(row['번호5']),
+                    parseInt(row['번호6'])
+                ];
+                const bonus = parseInt(row['보너스']);
+                const drawDate = row['추첨일'] || '';
+
+                if (nums.some(n => isNaN(n)) || isNaN(bonus)) return;
+
+                roundsMap.set(ep, {
+                    round: ep,
+                    date: drawDate,
+                    numbers: nums.sort((a,b) => a-b),
+                    bonus: bonus
+                });
+                sortedRoundNumbers.push(ep);
+            });
+
+            // Sort round numbers descending (e.g. 1230, 1229...)
+            sortedRoundNumbers.sort((a, b) => b - a);
+
+            if (sortedRoundNumbers.length === 0) {
+                alert("가공할 로또 당첨 데이터가 존재하지 않습니다.");
+                showDropzone();
+                return;
+            }
+
+            // Populate select box options
+            const select = document.getElementById('round-select');
+            select.innerHTML = '';
+            sortedRoundNumbers.forEach(round => {
+                const opt = document.createElement('option');
+                opt.value = round;
+                opt.textContent = `${round}회차`;
+                select.appendChild(opt);
+            });
+
+            // Check URL query parameters (e.g. ?round=1000)
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryRound = parseInt(urlParams.get('round'));
+
+            if (!isNaN(queryRound) && roundsMap.has(queryRound)) {
+                currentRound = queryRound;
+            } else {
+                currentRound = sortedRoundNumbers[0]; // Default to latest round
+            }
+
+            // Display details
+            select.value = currentRound;
+            displayRoundDetails(currentRound);
+
+            // Hide spinner and show panel
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('inspector-section').style.display = 'flex';
+        }
+
+        function handleRoundSelectChange() {
+            const select = document.getElementById('round-select');
+            currentRound = parseInt(select.value);
+            displayRoundDetails(currentRound);
+        }
+
+        function navigateRound(dir) {
+            const currentIndex = sortedRoundNumbers.indexOf(currentRound);
+            if (currentIndex === -1) return;
+
+            // Note: sortedRoundNumbers is sorted DESCENDING (newest first).
+            // So moving -1 in round value means incrementing index.
+            // dir = -1 (previous round) -> index + 1
+            // dir = +1 (next round) -> index - 1
+            const nextIndex = currentIndex - dir; 
+            
+            if (nextIndex >= 0 && nextIndex < sortedRoundNumbers.length) {
+                currentRound = sortedRoundNumbers[nextIndex];
+                document.getElementById('round-select').value = currentRound;
+                displayRoundDetails(currentRound);
+            }
+        }
+
+        // Render details of selected round
+        function displayRoundDetails(round) {
+            const record = roundsMap.get(round);
+            if (!record) return;
+
+            // Enable/disable navigation buttons
+            const idx = sortedRoundNumbers.indexOf(round);
+            document.getElementById('btn-prev-round').disabled = (idx >= sortedRoundNumbers.length - 1);
+            document.getElementById('btn-next-round').disabled = (idx <= 0);
+
+            // Draw date
+            document.getElementById('draw-date-text').textContent = `추첨일: ${record.date || '정보 없음'}`;
+
+            // Winning balls row
+            const ballsContainer = document.getElementById('winning-balls-row');
+            ballsContainer.innerHTML = '';
+            record.numbers.forEach(n => {
+                const b = document.createElement('div');
+                b.className = `ball ${getBallClass(n)}`;
+                b.textContent = n;
+                ballsContainer.appendChild(b);
+            });
+            const div = document.createElement('span');
+            div.className = 'bonus-divider';
+            div.textContent = '+';
+            ballsContainer.appendChild(div);
+            
+            const bonusBall = document.createElement('div');
+            bonusBall.className = `ball ${getBallClass(record.bonus)} bonus-ball`;
+            bonusBall.textContent = record.bonus;
+            ballsContainer.appendChild(bonusBall);
+
+            // Fetch previous round details for carryover/neighbors checks
+            const prevRecord = roundsMap.get(round - 1);
+            const prevNumbers = prevRecord ? prevRecord.numbers : [];
+
+            // Perform statistical calculations
+            const nums = record.numbers;
+            const sum = nums.reduce((a, b) => a + b, 0);
+            const ac = getACValue(nums);
+            const { odd, even } = getOddEvenRatio(nums);
+            const { low, high } = getHighLowRatio(nums);
+            const primeCount = getPrimeCount(nums);
+            const { g1, g2, g3 } = get3DivisionDistribution(nums);
+            const { carryOver, neighbors } = getPreviousDrawMatches(nums, prevNumbers);
+
+            // Scoring variables
+            let score = 0;
+
+            // 1. Sum
+            const sumPass = sum >= 100 && sum <= 175;
+            score += sumPass ? 20 : ( (sum >= 90 && sum < 100) || (sum > 175 && sum <= 185) ? 10 : 0 );
+            const statusSum = document.getElementById('status-sum');
+            statusSum.textContent = sumPass ? "합격" : "불합격";
+            statusSum.className = `status-badge ${sumPass ? 'pass' : 'fail'}`;
+            document.getElementById('val-sum').textContent = `${sum}`;
+            document.getElementById('progress-sum').style.width = `${Math.min(100, Math.max(0, (sum / 255) * 100))}%`;
+
+            // 2. AC
+            const acPass = ac >= 7 && ac <= 10;
+            score += acPass ? 20 : (ac === 6 ? 10 : 0);
+            const statusAC = document.getElementById('status-ac');
+            statusAC.textContent = acPass ? "합격" : "불합격";
+            statusAC.className = `status-badge ${acPass ? 'pass' : 'fail'}`;
+            document.getElementById('val-ac').textContent = `${ac}`;
+            document.getElementById('progress-ac').style.width = `${(ac / 10) * 100}%`;
+
+            // 3. Odd/Even
+            const oddRatioStr = `${odd}:${even}`;
+            const oddPass = oddRatioStr === '3:3' || oddRatioStr === '2:4' || oddRatioStr === '4:2';
+            score += oddRatioStr === '3:3' ? 20 : (oddPass ? 15 : 0);
+            const statusOdd = document.getElementById('status-oddeven');
+            statusOdd.textContent = oddPass ? "합격" : "불합격";
+            statusOdd.className = `status-badge ${oddPass ? 'pass' : 'fail'}`;
+            document.getElementById('lbl-odd').textContent = `홀수: ${odd}`;
+            document.getElementById('lbl-even').textContent = `짝수: ${even}`;
+            document.getElementById('odd-bar').style.width = `${(odd / 6) * 100}%`;
+            document.getElementById('even-bar').style.width = `${(even / 6) * 100}%`;
+
+            // 4. High/Low
+            const hlRatioStr = `${low}:${high}`;
+            const hlPass = hlRatioStr === '3:3' || hlRatioStr === '2:4' || hlRatioStr === '4:2';
+            score += hlRatioStr === '3:3' ? 15 : (hlPass ? 10 : 0);
+            const statusHL = document.getElementById('status-highlow');
+            statusHL.textContent = hlPass ? "합격" : "불합격";
+            statusHL.className = `status-badge ${hlPass ? 'pass' : 'fail'}`;
+            document.getElementById('lbl-low').textContent = `저수(1~22): ${low}`;
+            document.getElementById('lbl-high').textContent = `고수(23~45): ${high}`;
+            document.getElementById('low-bar').style.width = `${(low / 6) * 100}%`;
+            document.getElementById('high-bar').style.width = `${(high / 6) * 100}%`;
+
+            // 5. Prime Count
+            const primePass = primeCount >= 1 && primeCount <= 3;
+            score += primePass ? 15 : (primeCount === 0 || primeCount === 4 ? 5 : 0);
+            const statusPrime = document.getElementById('status-prime');
+            statusPrime.textContent = primePass ? "합격" : "불합격";
+            statusPrime.className = `status-badge ${primePass ? 'pass' : 'fail'}`;
+            document.getElementById('val-prime').textContent = `${primeCount}개`;
+            document.getElementById('progress-prime').style.width = `${(primeCount / 6) * 100}%`;
+
+            // 6. 3-Division Distribution
+            const divPass = g1 <= 4 && g2 <= 4 && g3 <= 4;
+            score += divPass ? 10 : 0;
+            const statusDiv = document.getElementById('status-division');
+            statusDiv.textContent = divPass ? "합격" : "불합격";
+            statusDiv.className = `status-badge ${divPass ? 'pass' : 'fail'}`;
+            document.getElementById('div-bar-1').style.width = `${(g1 / 6) * 100}%`;
+            document.getElementById('div-bar-2').style.width = `${(g2 / 6) * 100}%`;
+            document.getElementById('div-bar-3').style.width = `${(g3 / 6) * 100}%`;
+
+            // 7. Carryover & Neighbors (Dynamic results)
+            document.getElementById('prev-round-reference-lbl').textContent = prevRecord 
+                ? `직전 회차(${round - 1}회: ${prevRecord.numbers.join(', ')}) 대비 출현수`
+                : "직전 회차 데이터가 존재하지 않습니다.";
+
+            if (prevRecord) {
+                const carryStr = carryOver.length > 0 ? carryOver.join(', ') : '없음';
+                const neighStr = neighbors.length > 0 ? neighbors.join(', ') : '없음';
+                document.getElementById('val-carry').textContent = `이월수: ${carryOver.length}개 (${carryStr})`;
+                document.getElementById('val-neighbor').textContent = `이웃수: ${neighbors.length}개 (${neighStr})`;
+                
+                const carryPass = carryOver.length >= 1 || neighbors.length >= 1;
+                document.getElementById('status-carry').textContent = carryPass ? "합격" : "정보";
+                document.getElementById('status-carry').className = `status-badge ${carryPass ? 'pass' : 'neutral'}`;
+            } else {
+                document.getElementById('val-carry').textContent = `이월수: -`;
+                document.getElementById('val-neighbor').textContent = `이웃수: -`;
+                document.getElementById('status-carry').textContent = "정보";
+                document.getElementById('status-carry').className = "status-badge neutral";
+            }
+
+            // Render gauge & score
+            document.getElementById('gauge-score-val').textContent = score;
+
+            const circumference = 377;
+            const offset = circumference - (score / 100) * circumference;
+            document.getElementById('gauge-score-ring').style.strokeDashoffset = offset;
+
+            const gradeBadge = document.getElementById('gauge-grade-badge');
+            if (score >= 90) {
+                gradeBadge.textContent = "황금 조화";
+                gradeBadge.style.color = "var(--accent-success)";
+                gradeBadge.style.background = "rgba(16, 185, 129, 0.12)";
+            } else if (score >= 70) {
+                gradeBadge.textContent = "우수 조합";
+                gradeBadge.style.color = "var(--accent-primary)";
+                gradeBadge.style.background = "rgba(99, 102, 241, 0.12)";
+            } else if (score >= 50) {
+                gradeBadge.textContent = "보통 조합";
+                gradeBadge.style.color = "var(--accent-warning)";
+                gradeBadge.style.background = "rgba(245, 158, 11, 0.12)";
+            } else {
+                gradeBadge.textContent = "불균형 조합";
+                gradeBadge.style.color = "var(--accent-error)";
+                gradeBadge.style.background = "rgba(239, 68, 68, 0.12)";
+            }
+        }
+
+        // Start initialization
+        window.onload = initLoader;
+
+        // Global Tooltip Engine for Always-On-Top Rendering
+        (function() {
+            const tooltipEl = document.createElement('div');
+            tooltipEl.id = 'global-tooltip';
+            tooltipEl.style.cssText = `
+                position: fixed;
+                background: rgba(15, 23, 42, 0.98);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                color: #fff;
+                padding: 8px 12px;
+                border-radius: 8px;
+                font-size: 0.75rem;
+                font-weight: 500;
+                line-height: 1.45;
+                width: 240px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+                z-index: 99999;
+                display: none;
+                pointer-events: none;
+                opacity: 0;
+                transform: translate(-50%, -10px);
+                transition: opacity 0.15s, transform 0.15s;
+                text-align: left;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+            document.body.appendChild(tooltipEl);
+
+            let activeTarget = null;
+
+            document.addEventListener('mouseover', (e) => {
+                const target = e.target.closest('[data-tooltip]');
+                if (target) {
+                    activeTarget = target;
+                    const text = target.getAttribute('data-tooltip');
+                    tooltipEl.textContent = text;
+                    tooltipEl.style.display = 'block';
+                    
+                    requestAnimationFrame(() => {
+                        if (activeTarget !== target) return;
+                        const rect = target.getBoundingClientRect();
+                        let x = rect.left + rect.width / 2;
+                        let y = rect.top - 8;
+                        
+                        const tooltipWidth = tooltipEl.offsetWidth;
+                        const tooltipHeight = tooltipEl.offsetHeight;
+                        
+                        if (x - tooltipWidth / 2 < 10) {
+                            x = tooltipWidth / 2 + 10;
+                        } else if (x + tooltipWidth / 2 > window.innerWidth - 10) {
+                            x = window.innerWidth - tooltipWidth / 2 - 10;
+                        }
+                        
+                        if (y - tooltipHeight < 10) {
+                            y = rect.bottom + 8;
+                            tooltipEl.style.transform = 'translate(-50%, 0)';
+                            tooltipEl.style.top = y + 'px';
+                        } else {
+                            y = rect.top - 8;
+                            tooltipEl.style.transform = 'translate(-50%, -100%)';
+                            tooltipEl.style.top = y + 'px';
+                        }
+                        
+                        tooltipEl.style.left = x + 'px';
+                        tooltipEl.style.opacity = '1';
+                    });
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                const target = e.target.closest('[data-tooltip]');
+                if (target && activeTarget === target) {
+                    activeTarget = null;
+                    tooltipEl.style.opacity = '0';
+                    tooltipEl.style.display = 'none';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
