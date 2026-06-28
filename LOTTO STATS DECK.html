@@ -794,6 +794,7 @@
             color: #fff;
         }
     </style>
+    <script src="supabase_config.js"></script>
 </head>
 <body>
 
@@ -1642,7 +1643,102 @@
         }
 
         // Start Board Init
-        window.onload = initBoard;
+        window.onload = () => {
+            initBoard();
+            loadLatestDrawNumbers();
+        };
+
+        // CSV 파서 추가
+        function parseCSV(text) {
+            const lines = text.split(/\r?\n/);
+            if (lines.length === 0) return [];
+            let headerLine = lines[0];
+            if (headerLine.charCodeAt(0) === 0xFEFF) {
+                headerLine = headerLine.substring(1);
+            }
+            const headers = headerLine.split(',').map(h => h.trim());
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const values = line.split(',').map(v => v.trim());
+                if (values.length !== headers.length) continue;
+                const row = {};
+                headers.forEach((h, index) => {
+                    row[h] = values[index];
+                });
+                data.push(row);
+            }
+            return data;
+        }
+
+        // DB 또는 CSV로부터 최신 번호를 가져와 입력창 자동 설정
+        function loadLatestDrawNumbers() {
+            if (typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+                console.log("Supabase에서 최신 당첨 번호를 조회하여 직전 회차로 설정합니다...");
+                fetch(`${SUPABASE_CONFIG.url}/rest/v1/lotto_history?select=*&order=round.desc&limit=1`, {
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.anonKey,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+                    }
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("DB API 응답 오류");
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const latest = data[0];
+                        setPrevDrawInputs(latest.round, [latest.num1, latest.num2, latest.num3, latest.num4, latest.num5, latest.num6]);
+                    } else {
+                        throw new Error("데이터가 비어 있음");
+                    }
+                })
+                .catch(err => {
+                    console.warn("최신 번호 DB 로드 실패, CSV 폴백 시도:", err.message);
+                    loadLatestDrawFromCsv();
+                });
+            } else {
+                loadLatestDrawFromCsv();
+            }
+        }
+
+        function loadLatestDrawFromCsv() {
+            fetch('lotto_history.csv')
+                .then(res => {
+                    if (!res.ok) throw new Error("CSV load failed");
+                    return res.text();
+                })
+                .then(text => {
+                    const records = parseCSV(text);
+                    if (records && records.length > 0) {
+                        records.sort((a, b) => parseInt(b['회차']) - parseInt(a['회차']));
+                        const latest = records[0];
+                        const nums = [
+                            parseInt(latest['번호1']),
+                            parseInt(latest['번호2']),
+                            parseInt(latest['번호3']),
+                            parseInt(latest['번호4']),
+                            parseInt(latest['번호5']),
+                            parseInt(latest['번호6'])
+                        ];
+                        setPrevDrawInputs(parseInt(latest['회차']), nums);
+                    }
+                })
+                .catch(err => {
+                    console.log("로컬 CSV 로드 실패. 기본값을 사용합니다:", err.message);
+                });
+        }
+
+        function setPrevDrawInputs(round, nums) {
+            console.log(`직전 회차 번호 로드 완료 (${round}회차): ${nums.join(', ')}`);
+            for (let i = 1; i <= 6; i++) {
+                const input = document.getElementById(`prev-${i}`);
+                if (input) input.value = nums[i - 1];
+            }
+            updateUI();
+            showNotification(`직전 회차 번호가 최신 ${round}회차로 자동 설정되었습니다!`);
+        }
 
         // Global Tooltip Engine for Always-On-Top Rendering (Bypasses overflow:hidden limitations)
         (function() {
