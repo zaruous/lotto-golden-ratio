@@ -131,11 +131,27 @@
             numbers: [1,2,3,4,5,6].map(i => Number(source === 'db' ? row[`num${i}`] : row[`번호${i}`]))
         })).filter(r => Number.isInteger(r.round) && r.numbers.every(n => n >= 1 && n <= 45)).sort((a,b) => a.round-b.round);
     }
+    // Supabase는 프로젝트 설정상 한 번의 요청에 최대 1000행만 반환하므로,
+    // Range 헤더로 페이지를 나눠 요청해 전체 회차를 모아온다.
+    async function fetchAllSupabaseRows(selectQuery) {
+        const pageSize = 1000;
+        let all = [];
+        let from = 0;
+        while (true) {
+            const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/lotto_history?${selectQuery}`, { headers: { apikey: SUPABASE_CONFIG.anonKey, Authorization: `Bearer ${SUPABASE_CONFIG.anonKey}`, Range: `${from}-${from + pageSize - 1}` } });
+            if (!res.ok) throw new Error('Supabase 응답 실패');
+            const page = await res.json();
+            all = all.concat(page);
+            if (page.length < pageSize) break;
+            from += pageSize;
+        }
+        return all;
+    }
     async function loadData() {
         try {
             if (!window.SUPABASE_CONFIG?.url || !SUPABASE_CONFIG.anonKey) throw new Error('Supabase 설정 없음');
-            const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/lotto_history?select=round,num1,num2,num3,num4,num5,num6&order=round.asc`, { headers: { apikey: SUPABASE_CONFIG.anonKey, Authorization: `Bearer ${SUPABASE_CONFIG.anonKey}` } });
-            if (!res.ok) throw new Error('Supabase 응답 실패'); records = normalizeRows(await res.json(), 'db');
+            const rows = await fetchAllSupabaseRows('select=round,num1,num2,num3,num4,num5,num6&order=round.asc');
+            records = normalizeRows(rows, 'db');
             document.getElementById('load-status').textContent = `Supabase · ${records.length.toLocaleString()}개 회차`;
         } catch (error) {
             const res = await fetch('lotto_history.csv'); if (!res.ok) throw error;
