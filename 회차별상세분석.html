@@ -1062,6 +1062,10 @@
                             <div class="breakdown-group-title">③ 3분할 분포 (구간당 최대 4개인 황금구간 내 상위 패턴, 1~15:16~30:31~45)</div>
                             <div class="breakdown-rows" id="breakdown-division"></div>
                         </div>
+                        <div class="breakdown-group">
+                            <div class="breakdown-group-title">④ 소수 개수 (황금구간 1~3개 내 세부 분포)</div>
+                            <div class="breakdown-rows" id="breakdown-prime"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1150,18 +1154,21 @@
             const oddEvenCounts = {};
             const highLowCounts = {};
             const divisionCounts = {};
+            const primeCounts = {};
 
             roundsMap.forEach(record => {
                 const nums = record.numbers;
                 const { odd, even } = getOddEvenRatio(nums);
                 const { low, high } = getHighLowRatio(nums);
                 const { g1, g2, g3 } = get3DivisionDistribution(nums);
+                const primeCount = getPrimeCount(nums);
 
                 const oeKey = `${odd}:${even}`;
                 const hlKey = `${low}:${high}`;
 
                 oddEvenCounts[oeKey] = (oddEvenCounts[oeKey] || 0) + 1;
                 highLowCounts[hlKey] = (highLowCounts[hlKey] || 0) + 1;
+                primeCounts[primeCount] = (primeCounts[primeCount] || 0) + 1;
 
                 if (g1 <= 4 && g2 <= 4 && g3 <= 4) {
                     const divKey = `${g1}:${g2}:${g3}`;
@@ -1174,9 +1181,10 @@
             renderBreakdownRatioRows('breakdown-oddeven', oddEvenCounts, ['3:3', '4:2', '2:4']);
             renderBreakdownRatioRows('breakdown-highlow', highLowCounts, ['3:3', '4:2', '2:4']);
             renderBreakdownDivisionRows('breakdown-division', divisionCounts);
+            renderBreakdownRatioRows('breakdown-prime', primeCounts, ['1', '2', '3'], '개');
         }
 
-        function renderBreakdownRatioRows(containerId, counts, keys) {
+        function renderBreakdownRatioRows(containerId, counts, keys, labelSuffix = '') {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
 
@@ -1187,7 +1195,7 @@
                 const count = counts[key] || 0;
                 const pct = goldenTotal > 0 ? (count / goldenTotal * 100) : 0;
                 const isMax = key === maxKey && count > 0;
-                container.appendChild(buildBreakdownRow(key, count, pct, isMax));
+                container.appendChild(buildBreakdownRow(`${key}${labelSuffix}`, count, pct, isMax));
             });
         }
 
