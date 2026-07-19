@@ -36,6 +36,7 @@
             color: var(--text-main);
             min-height: 100vh;
             padding: 20px;
+            padding: calc(20px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
             line-height: 1.6;
         }
 
@@ -736,6 +737,7 @@
         @media (max-width: 768px) {
             body {
                 padding: 12px;
+                padding: calc(12px + env(safe-area-inset-top, 0px)) calc(12px + env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px));
             }
             header {
                 margin: 20px 0 15px 0;
@@ -1720,6 +1722,7 @@
             });
         })();
     </script>
+    <script src="native-app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));

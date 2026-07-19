@@ -4,7 +4,7 @@
 //  - 페이지 이동(navigate)과 lotto_history.csv는 network-first: 항상 최신 회차를 우선하되 실패 시 캐시 폴백
 //  - 그 외 정적 자산(폰트 포함)은 cache-first
 //  - Supabase API 요청은 캐시하지 않음 (각 페이지에 CSV 폴백 로직이 이미 존재)
-const CACHE_NAME = 'lgr-static-v1';
+const CACHE_NAME = 'lgr-static-v2';
 
 const APP_SHELL = [
     './',
@@ -14,6 +14,7 @@ const APP_SHELL = [
     './회차별상세분석.html',
     './히트맵분석.html',
     './supabase_config.js',
+    './native-app.js',
     './lotto_history.csv',
     './manifest.json',
     './icons/icon-192.png',

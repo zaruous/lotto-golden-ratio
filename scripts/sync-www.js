@@ -14,6 +14,7 @@ const ASSETS = [
     '회차별상세분석.html',
     '히트맵분석.html',
     'supabase_config.js',
+    'native-app.js',
     'lotto_history.csv',
     'manifest.json',
     'sw.js',
