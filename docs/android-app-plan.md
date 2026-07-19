@@ -84,7 +84,10 @@
 6. ~~Phase 3 착수: FCM 푸시 이중화~~ ❌ 푸시 제외 결정 (2026-07-19). 딥링크는 선택 항목으로 보류
 7. ~~Phase 4: Supabase RLS 읽기 전용 정책 재확인~~ ✅ 완료 (2026-07-19) — anon 키로 SELECT 200 / INSERT 401(42501) / UPDATE·DELETE 0건 적용(RLS 필터링) 확인. 읽기 전용 구성 검증됨
 8. ~~Phase 5: 다양한 해상도 테스트~~ ✅ 완료 (2026-07-19) — 에뮬레이터 3종(Small Phone 360dp / Medium Phone 412dp / Pixel Tablet 1280dp) + 삼성 실기기에서 홈·DECK·대시보드·히트맵 렌더링 및 데이터 로딩 정상. 태블릿에서 데스크톱 탭 레이아웃 전환 확인. (AVD는 C: 공간 부족으로 `ANDROID_AVD_HOME=E:\Android\avd`에 저장)
-9. Phase 6: 릴리즈 키스토어 생성, 개인정보처리방침, Play Console 등록
+9. Phase 6 (일부 완료): ~~릴리즈 키스토어 생성 및 서명 APK 빌드~~ ✅ 완료 (2026-07-19)
+   - 키스토어: `android/release.keystore` (RSA 2048, 30년) + `android/keystore.properties` — **git 제외, `E:\Android\keystore-backup`에 백업. 분실 시 앱 업데이트 불가!**
+   - 빌드: `cd android && gradlew assembleRelease` → `android/app/build/outputs/apk/release/app-release.apk` (4.4MB, apksigner 검증 및 에뮬레이터 구동 확인)
+   - 남은 항목: 개인정보처리방침 문서, Play Console 등록(AAB는 `gradlew bundleRelease`), 스토어 설명에 "실제 구매·베팅 기능 없음" 명시
 
 ## 6. 개발 워크플로 (스캐폴딩 후)
 
