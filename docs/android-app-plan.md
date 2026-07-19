@@ -82,8 +82,8 @@
 4. ~~빌드 확인~~ ✅ 완료 — Android SDK command-line tools(`E:\Android\Sdk`)로 `gradlew assembleDebug` 빌드, 실기기 설치·검증 (Android Studio 없이 진행)
 5. ~~Phase 2 착수: `@capacitor/app` 설치 후 하드웨어 뒤로가기 처리, `safe-area-inset` 대응~~ ✅ 완료 — `native-app.js`(웹에서는 no-op), body padding에 `env(safe-area-inset-*)` 적용, 터치 제스처 충돌 없음 확인(차트 라이브러리 미사용)
 6. ~~Phase 3 착수: FCM 푸시 이중화~~ ❌ 푸시 제외 결정 (2026-07-19). 딥링크는 선택 항목으로 보류
-7. Phase 4: Supabase RLS 읽기 전용 정책 재확인 (CSV 번들링은 Phase 1에서 완료)
-8. Phase 5: 다양한 해상도 및 몬테카를로 생성기 성능 테스트
+7. ~~Phase 4: Supabase RLS 읽기 전용 정책 재확인~~ ✅ 완료 (2026-07-19) — anon 키로 SELECT 200 / INSERT 401(42501) / UPDATE·DELETE 0건 적용(RLS 필터링) 확인. 읽기 전용 구성 검증됨
+8. ~~Phase 5: 다양한 해상도 테스트~~ ✅ 완료 (2026-07-19) — 에뮬레이터 3종(Small Phone 360dp / Medium Phone 412dp / Pixel Tablet 1280dp) + 삼성 실기기에서 홈·DECK·대시보드·히트맵 렌더링 및 데이터 로딩 정상. 태블릿에서 데스크톱 탭 레이아웃 전환 확인. (AVD는 C: 공간 부족으로 `ANDROID_AVD_HOME=E:\Android\avd`에 저장)
 9. Phase 6: 릴리즈 키스토어 생성, 개인정보처리방침, Play Console 등록
 
 ## 6. 개발 워크플로 (스캐폴딩 후)
