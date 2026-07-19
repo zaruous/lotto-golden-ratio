@@ -44,7 +44,7 @@
 - 스크롤/터치 제스처 충돌 점검(차트 라이브러리가 있다면 pinch-zoom 등)
 
 ### Phase 3 — 네이티브 기능 확장
-- **푸시 알림**: 현재 텔레그램 봇으로 발송 중인 "당첨 결과/새 회차 발표" 알림을 FCM(`@capacitor/push-notifications`)으로 이중화 — Cloudflare Worker에서 텔레그램과 함께 FCM 토픽 발송 추가
+- ~~**푸시 알림**: 현재 텔레그램 봇으로 발송 중인 "당첨 결과/새 회차 발표" 알림을 FCM(`@capacitor/push-notifications`)으로 이중화 — Cloudflare Worker에서 텔레그램과 함께 FCM 토픽 발송 추가~~ ❌ 제외 결정 (2026-07-19) — 텔레그램 알림으로 충분
 - **딥링크**: `lottogoldenratio://detail/{회차}` 형태로 회차별 상세 분석 페이지 딥링크 지원
 - **위젯(선택)**: "오늘의 추천 조합"을 홈 화면 위젯으로 노출하려면 별도 네이티브 Kotlin 위젯 모듈 필요(Capacitor 범위 밖, Phase 5 이후 검토)
 
@@ -81,7 +81,10 @@
 3. ~~`npx cap init` 및 `android/` 프로젝트 생성 PR~~ ✅ 완료
 4. ~~빌드 확인~~ ✅ 완료 — Android SDK command-line tools(`E:\Android\Sdk`)로 `gradlew assembleDebug` 빌드, 실기기 설치·검증 (Android Studio 없이 진행)
 5. ~~Phase 2 착수: `@capacitor/app` 설치 후 하드웨어 뒤로가기 처리, `safe-area-inset` 대응~~ ✅ 완료 — `native-app.js`(웹에서는 no-op), body padding에 `env(safe-area-inset-*)` 적용, 터치 제스처 충돌 없음 확인(차트 라이브러리 미사용)
-6. Phase 3 착수: FCM 푸시 이중화(Cloudflare Worker 연동), 딥링크(`lottogoldenratio://detail/{회차}`)
+6. ~~Phase 3 착수: FCM 푸시 이중화~~ ❌ 푸시 제외 결정 (2026-07-19). 딥링크는 선택 항목으로 보류
+7. Phase 4: Supabase RLS 읽기 전용 정책 재확인 (CSV 번들링은 Phase 1에서 완료)
+8. Phase 5: 다양한 해상도 및 몬테카를로 생성기 성능 테스트
+9. Phase 6: 릴리즈 키스토어 생성, 개인정보처리방침, Play Console 등록
 
 ## 6. 개발 워크플로 (스캐폴딩 후)
 
