@@ -1,3 +1,11 @@
 *.bak
 .DS_Store
 Thumbs.db
+
+# Node / Capacitor
+node_modules/
+www/
+
+# 릴리즈 서명 (절대 커밋 금지 — E:\Android\keystore-backup 에 백업본 유지)
+android/release.keystore
+android/keystore.properties
