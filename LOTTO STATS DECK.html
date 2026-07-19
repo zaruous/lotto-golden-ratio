@@ -1751,6 +1751,12 @@
 
                 updateUI();
                 showNotification("생성된 조합을 번호판에 등록하여 상세 분석을 수행합니다!");
+
+                // 적용된 조합이 바로 보이도록 번호 선택판(패널 상단)으로 스크롤 이동
+                const boardEl = document.getElementById('number-board');
+                if (boardEl) {
+                    (boardEl.closest('.panel-card') || boardEl).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             }
         }
 
