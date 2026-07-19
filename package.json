@@ -1,0 +1,25 @@
+{
+    "name": "lotto-golden-ratio",
+    "version": "1.0.0",
+    "private": true,
+    "description": "로또 6/45 번호 통계 분석·시뮬레이션 플랫폼 (GitHub Pages 웹 + Capacitor 안드로이드 앱)",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/zaruous/lotto-golden-ratio.git"
+    },
+    "scripts": {
+        "icons": "node scripts/generate-icons.js",
+        "sync:www": "node scripts/sync-www.js",
+        "cap:sync": "npm run sync:www && cap sync android",
+        "cap:open": "cap open android"
+    },
+    "dependencies": {
+        "@capacitor/android": "^8.4.2",
+        "@capacitor/app": "^8.1.1",
+        "@capacitor/core": "^8.4.2"
+    },
+    "devDependencies": {
+        "@capacitor/cli": "^8.4.2",
+        "sharp": "^0.35.3"
+    }
+}
