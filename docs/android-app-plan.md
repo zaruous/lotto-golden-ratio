@@ -2,6 +2,8 @@
 
 본 문서는 현재 GitHub Pages 기반 정적 웹 플랫폼(LOTTO GOLDEN RATIO)을 안드로이드 앱으로 배포하기 위한 실행 계획입니다.
 
+> **진행 현황 (2026-07-19)**: A안(Capacitor 하이브리드) 확정. Phase 0(PWA화) 및 Phase 1(Capacitor 스캐폴딩) 완료 — `manifest.json`/`sw.js`/앱 아이콘 추가, `android/` 네이티브 프로젝트 생성, 런처 아이콘·스플래시 74종 생성 완료. 다음 단계는 Phase 2(모바일 UX 보정)이며, 빌드 검증에는 Android Studio(SDK) 설치가 필요합니다.
+
 ## 1. 현재 상태 진단
 
 | 항목 | 현황 | 앱 전환 시 의미 |
@@ -74,6 +76,21 @@
 
 ## 5. 다음 액션
 
-1. Capacitor 방식(A) 확정 여부 확인
-2. `manifest.json` + Service Worker 추가로 PWA화 (Phase 0)
-3. `npx cap init` 및 `android/` 프로젝트 생성 PR
+1. ~~Capacitor 방식(A) 확정 여부 확인~~ ✅ 확정 (2026-07-19)
+2. ~~`manifest.json` + Service Worker 추가로 PWA화 (Phase 0)~~ ✅ 완료
+3. ~~`npx cap init` 및 `android/` 프로젝트 생성 PR~~ ✅ 완료
+4. Android Studio에서 `npm run cap:sync` 후 `android/` 열어 에뮬레이터 빌드 확인
+5. Phase 2 착수: `@capacitor/app` 설치 후 하드웨어 뒤로가기 처리, `safe-area-inset` 대응
+
+## 6. 개발 워크플로 (스캐폴딩 후)
+
+| 명령 | 설명 |
+| :--- | :--- |
+| `npm run icons` | `icons/`(PWA용)와 `assets/`(@capacitor/assets 소스) 아이콘 재생성 |
+| `npm run sync:www` | 웹 자산(HTML/JS/CSV/manifest/sw/icons)만 골라 `www/`로 복사 |
+| `npm run cap:sync` | `sync:www` 후 `cap sync android` — 네이티브 프로젝트에 웹 자산 반영 |
+| `npm run cap:open` | Android Studio로 `android/` 프로젝트 열기 |
+| `npx @capacitor/assets generate --android` | `assets/` 소스로 런처 아이콘·스플래시 재생성 |
+
+- 웹 자산(HTML 등)을 수정하면 `npm run cap:sync`만 다시 실행하면 됩니다.
+- `www/`와 `node_modules/`는 빌드 산출물이므로 gitignore 처리되어 있습니다.

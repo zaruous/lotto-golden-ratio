@@ -1,0 +1,32 @@
+{
+    "name": "LOTTO GOLDEN RATIO",
+    "short_name": "Golden Ratio",
+    "description": "로또 6/45 번호 통계 분석·시뮬레이션 도구 (실제 구매·베팅 기능 없음)",
+    "lang": "ko",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0b0f19",
+    "theme_color": "#0b0f19",
+    "icons": [
+        {
+            "src": "icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
