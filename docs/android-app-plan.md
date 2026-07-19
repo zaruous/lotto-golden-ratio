@@ -2,7 +2,7 @@
 
 본 문서는 현재 GitHub Pages 기반 정적 웹 플랫폼(LOTTO GOLDEN RATIO)을 안드로이드 앱으로 배포하기 위한 실행 계획입니다.
 
-> **진행 현황 (2026-07-19)**: A안(Capacitor 하이브리드) 확정. Phase 0(PWA화) 및 Phase 1(Capacitor 스캐폴딩) 완료 — `manifest.json`/`sw.js`/앱 아이콘 추가, `android/` 네이티브 프로젝트 생성, 런처 아이콘·스플래시 74종 생성 완료. 다음 단계는 Phase 2(모바일 UX 보정)이며, 빌드 검증에는 Android Studio(SDK) 설치가 필요합니다.
+> **진행 현황 (2026-07-19)**: A안(Capacitor 하이브리드) 확정. **Phase 0(PWA화)·Phase 1(스캐폴딩)·Phase 2(모바일 UX 보정) 완료.** Android SDK(command-line tools, `E:\Android\Sdk`, Android Studio 불필요)로 디버그 APK를 빌드해 삼성 실기기에서 검증 완료 — 화면 렌더링·페이지 이동·데이터 로딩(1,034회차)·뒤로가기(히스토리 백 → 홈에서 종료 확인 다이얼로그) 모두 정상. 다음 단계는 Phase 3(네이티브 기능 확장).
 
 ## 1. 현재 상태 진단
 
@@ -79,8 +79,9 @@
 1. ~~Capacitor 방식(A) 확정 여부 확인~~ ✅ 확정 (2026-07-19)
 2. ~~`manifest.json` + Service Worker 추가로 PWA화 (Phase 0)~~ ✅ 완료
 3. ~~`npx cap init` 및 `android/` 프로젝트 생성 PR~~ ✅ 완료
-4. Android Studio에서 `npm run cap:sync` 후 `android/` 열어 에뮬레이터 빌드 확인
-5. Phase 2 착수: `@capacitor/app` 설치 후 하드웨어 뒤로가기 처리, `safe-area-inset` 대응
+4. ~~빌드 확인~~ ✅ 완료 — Android SDK command-line tools(`E:\Android\Sdk`)로 `gradlew assembleDebug` 빌드, 실기기 설치·검증 (Android Studio 없이 진행)
+5. ~~Phase 2 착수: `@capacitor/app` 설치 후 하드웨어 뒤로가기 처리, `safe-area-inset` 대응~~ ✅ 완료 — `native-app.js`(웹에서는 no-op), body padding에 `env(safe-area-inset-*)` 적용, 터치 제스처 충돌 없음 확인(차트 라이브러리 미사용)
+6. Phase 3 착수: FCM 푸시 이중화(Cloudflare Worker 연동), 딥링크(`lottogoldenratio://detail/{회차}`)
 
 ## 6. 개발 워크플로 (스캐폴딩 후)
 

@@ -23,6 +23,7 @@
             background: radial-gradient(circle at top right, #1e1b4b, var(--bg-primary) 60%);
             background-attachment: fixed; color: var(--text-main); min-height: 100vh;
             padding: 20px; line-height: 1.6;
+            padding: calc(20px + env(safe-area-inset-top, 0px)) calc(20px + env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) calc(20px + env(safe-area-inset-left, 0px));
         }
         .container { width: 100%; max-width: 1200px; margin: 0 auto; padding-bottom: 50px; }
         header { text-align: center; margin: 40px 0 35px; }
@@ -68,7 +69,7 @@
         .notice { color: var(--text-muted); font-size: .78rem; margin-top: 15px; }
         @media (max-width: 900px) { .heatmap { grid-template-columns: repeat(5,1fr); } .summary-grid { grid-template-columns: repeat(2,1fr); } }
         @media (max-width: 768px) {
-            body { padding: 12px; } header { margin: 20px 0 15px; } h1 { font-size: 2rem; }
+            body { padding: 12px; padding: calc(12px + env(safe-area-inset-top, 0px)) calc(12px + env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px)); } header { margin: 20px 0 15px; } h1 { font-size: 2rem; }
             .nav-bar { padding: 10px 16px; margin-bottom: 25px; }
             .nav-brand { display: block; }
             .menu-toggle { display: block; }
@@ -199,6 +200,7 @@
     document.getElementById('apply-btn').addEventListener('click', render);
     loadData().catch(error => document.getElementById('load-status').textContent = `로드 실패: ${error.message}`);
 </script>
+<script src="native-app.js"></script>
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
