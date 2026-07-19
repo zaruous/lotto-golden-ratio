@@ -48,6 +48,39 @@ async function render(spec, outFile) {
     console.log('generated:', outFile);
 }
 
+// Play 스토어 그래픽 이미지(Feature Graphic, 1024x500)
+function featureGraphicSvg() {
+    const w = 1024;
+    const h = 500;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    <defs>
+        <radialGradient id="bg" cx="0.85" cy="0" r="1.4">
+            <stop offset="0%" stop-color="#1e1b4b"/>
+            <stop offset="65%" stop-color="#0b0f19"/>
+        </radialGradient>
+        <linearGradient id="gold" x1="0" y1="0" x2="${w}" y2="${h}" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#fbbf24"/>
+            <stop offset="100%" stop-color="#f59e0b"/>
+        </linearGradient>
+        <linearGradient id="title" x1="0" y1="0" x2="${w}" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="35%" stop-color="#ffffff"/>
+            <stop offset="90%" stop-color="#a5b4fc"/>
+        </linearGradient>
+    </defs>
+    <rect width="${w}" height="${h}" fill="url(#bg)"/>
+    ${phiGlyph(190, 250, 300)}
+    <text x="370" y="235" font-family="Segoe UI, Arial, sans-serif" font-size="56" font-weight="800" fill="url(#title)" letter-spacing="1">LOTTO GOLDEN RATIO</text>
+    <text x="373" y="300" font-family="Malgun Gothic, Segoe UI, sans-serif" font-size="28" fill="#94a3b8">로또 6/45 통계 분석 · 시뮬레이션 플랫폼</text>
+</svg>`;
+}
+
+async function renderFeatureGraphic() {
+    const outPath = path.join(ROOT, 'assets/feature-graphic.png');
+    fs.mkdirSync(path.dirname(outPath), { recursive: true });
+    await sharp(Buffer.from(featureGraphicSvg())).png().toFile(outPath);
+    console.log('generated: assets/feature-graphic.png');
+}
+
 (async () => {
     // PWA manifest용
     await render({ size: 192, withBackground: true, cornerRadius: 42, glyphFraction: 0.62 }, 'icons/icon-192.png');
@@ -61,6 +94,9 @@ async function render(spec, outFile) {
     await render({ size: 1024, withBackground: true, cornerRadius: 0, glyphFraction: 0 }, 'assets/icon-background.png');
     await render({ size: 2732, withBackground: true, cornerRadius: 0, glyphFraction: 0.18 }, 'assets/splash.png');
     await render({ size: 2732, withBackground: true, cornerRadius: 0, glyphFraction: 0.18 }, 'assets/splash-dark.png');
+
+    // Play 스토어 등록용
+    await renderFeatureGraphic();
 })().catch((err) => {
     console.error(err);
     process.exit(1);
