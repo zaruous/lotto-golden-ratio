@@ -36,16 +36,29 @@ jobs:
 
       # 4. 변경 사항이 있을 경우 자동 커밋 및 푸시
       - name: Commit & Push changes if updated
+        id: commit
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add lotto_history.csv
-          
+
           # 변경사항(diff)이 있는 경우에만 커밋 및 푸시 수행
           if ! git diff-index --quiet HEAD; then
             git commit -m "auto: 주간 로또 당첨내역 자동 업데이트"
             git push
             echo "CSV 데이터가 성공적으로 갱신되어 저장소에 업로드되었습니다."
+            echo "updated=true" >> "$GITHUB_OUTPUT"
           else
             echo "갱신할 새로운 당첨 회차 데이터가 없습니다."
+            echo "updated=false" >> "$GITHUB_OUTPUT"
           fi
+
+      # 5. 새 당첨번호가 실제로 갱신된 경우에만 텔레그램으로 결과 발송
+      - name: Send winning result to Telegram
+        if: steps.commit.outputs.updated == 'true'
+        run: node send_lotto_result_telegram.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
