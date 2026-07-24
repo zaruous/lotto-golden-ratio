@@ -627,6 +627,30 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
+        .btn-share {
+            background: rgba(16, 185, 129, 0.12);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--accent-success);
+        }
+
+        .btn-share:hover {
+            background: rgba(16, 185, 129, 0.22);
+        }
+
+        /* Share Actions */
+        .share-action-area {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .gen-result-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         /* Generated Combination Card */
         #generated-result-wrap {
             margin-top: 15px;
@@ -943,6 +967,13 @@
                     </div>
                 </div>
 
+                <div class="share-action-area">
+                    <button class="btn btn-secondary btn-share" onclick="shareCombination(selectedNumbers)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        이 조합 공유하기
+                    </button>
+                </div>
+
                 <!-- Prev draw config -->
                 <div class="prev-draw-panel">
                     <div class="panel-desc" style="font-weight: 600; color: #fff; margin-bottom: 4px;">직전 회차 당첨 번호 설정</div>
@@ -1205,7 +1236,13 @@
                         <h4>생성된 하모니 조합</h4>
                         <div class="balls-row" id="generated-balls"></div>
                         <div class="gen-meta" id="gen-meta-text">시도 횟수: 0회</div>
-                        <button class="btn btn-secondary" onclick="applyGeneratedNumbers()">이 조합을 선택판에 적용하기</button>
+                        <div class="gen-result-actions">
+                            <button class="btn btn-secondary" onclick="applyGeneratedNumbers()">이 조합을 선택판에 적용하기</button>
+                            <button class="btn btn-secondary btn-share" onclick="shareCombination(generatedTempNumbers)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                공유하기
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1243,6 +1280,60 @@
             updateUI();
             showNotification(`텔레그램 추천 번호 ${urlNumbers.join(', ')}를 적용했습니다.`);
             return true;
+        }
+
+        // Build a shareable link that restores this combination via ?numbers=
+        function buildShareUrl(nums) {
+            const base = window.location.href.split('?')[0].split('#')[0];
+            return `${base}?numbers=${nums.join(',')}`;
+        }
+
+        // Share Combination (Web Share API → mobile share sheet incl. KakaoTalk, fallback → clipboard copy)
+        async function shareCombination(nums) {
+            if (!nums || nums.length !== 6) {
+                showNotification("공유할 번호 6개를 먼저 선택하거나 생성해주세요.");
+                return;
+            }
+
+            const shareUrl = buildShareUrl(nums);
+            const shareText = `🎰 로또 골든 조합: ${nums.join(', ')}\nLOTTO STATS DECK에서 통계 하모니 분석 결과를 확인해보세요!`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'LOTTO STATS DECK 추천 조합', text: shareText, url: shareUrl });
+                    return;
+                } catch (err) {
+                    if (err && err.name === 'AbortError') return;
+                    // 공유 시트를 지원하지 않거나 실패한 경우 링크 복사로 대체
+                }
+            }
+            copyShareLink(shareUrl);
+        }
+
+        function copyShareLink(url) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url)
+                    .then(() => showNotification("공유 링크를 클립보드에 복사했습니다! 카카오톡 등에 붙여넣어 공유해보세요."))
+                    .catch(() => legacyCopyToClipboard(url));
+            } else {
+                legacyCopyToClipboard(url);
+            }
+        }
+
+        function legacyCopyToClipboard(text) {
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            temp.style.position = 'fixed';
+            temp.style.opacity = '0';
+            document.body.appendChild(temp);
+            temp.select();
+            try {
+                document.execCommand('copy');
+                showNotification("공유 링크를 클립보드에 복사했습니다! 카카오톡 등에 붙여넣어 공유해보세요.");
+            } catch (err) {
+                showNotification(`링크 복사에 실패했습니다. 직접 복사해주세요: ${text}`);
+            }
+            document.body.removeChild(temp);
         }
 
         function setGridFilter(type) {
