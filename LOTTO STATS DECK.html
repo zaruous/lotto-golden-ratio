@@ -581,6 +581,167 @@
             transform: scale(1);
         }
 
+        /* Overdue (연속 미출현) Recommendation Panel */
+        .overdue-panel {
+            background: rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(245, 158, 11, 0.18);
+            border-radius: 14px;
+            padding: 16px 18px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .overdue-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .overdue-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .overdue-head .filter-check-label {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .overdue-head .filter-check-label:hover {
+            background: none;
+            border-color: transparent;
+        }
+
+        .overdue-badge {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--accent-warning);
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 20px;
+            padding: 4px 12px;
+            white-space: nowrap;
+        }
+
+        .overdue-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .overdue-scale-end {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .overdue-range {
+            appearance: none;
+            -webkit-appearance: none;
+            flex: 1;
+            height: 6px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.35), rgba(245, 158, 11, 0.55));
+            outline: none;
+            cursor: pointer;
+        }
+
+        .overdue-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-warning));
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+            cursor: pointer;
+        }
+
+        .overdue-range::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-warning));
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+            cursor: pointer;
+        }
+
+        .overdue-range:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .overdue-status {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .overdue-candidates {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .overdue-chip {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 5px;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fde68a;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 20px;
+            padding: 5px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .overdue-chip:hover {
+            background: rgba(245, 158, 11, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .overdue-chip.picked {
+            background: rgba(245, 158, 11, 0.28);
+            border-color: var(--accent-warning);
+            color: #fff;
+        }
+
+        .overdue-chip .chip-streak {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .overdue-chip.picked .chip-streak {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .overdue-more {
+            align-self: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .ball.overdue-pick {
+            outline: 2px solid var(--accent-warning);
+            outline-offset: 2px;
+        }
+
         .gen-action-area {
             display: flex;
             gap: 15px;
@@ -954,6 +1115,7 @@
                         <button class="filter-chip" onclick="setGridFilter('prime')" data-tooltip="1과 자기 자신으로만 나누어지는 소수(2, 3, 5, 7, 11...)만 밝게 표시합니다.">소수</button>
                         <button class="filter-chip" onclick="setGridFilter('multiple3')" data-tooltip="3의 배수(3, 6, 9, 12, 15...)만 밝게 표시합니다.">3의 배수</button>
                         <button class="filter-chip" onclick="setGridFilter('prevNeighbors')" data-tooltip="설정된 직전 회차 당첨 번호의 양옆 숫자(이웃수)만 밝게 표시합니다.">이웃수</button>
+                        <button class="filter-chip" onclick="setGridFilter('overdue')" data-tooltip="아래 생성기에서 설정한 '연속 미출현 기준 회차' 이상 연속으로 빠진 번호만 밝게 표시합니다.">연속 미출현</button>
                     </div>
                 </div>
 
@@ -1227,6 +1389,28 @@
                     </label>
                 </div>
 
+                <!-- 연속 미출현(연속 실패) 번호 추천 -->
+                <div class="overdue-panel">
+                    <div class="overdue-head">
+                        <div class="overdue-title-wrap">
+                            <label class="filter-check-label">
+                                <input type="checkbox" id="filter-overdue" onchange="onOverdueToggle()">
+                                <span>연속 미출현(연속 실패) 번호 추천</span>
+                            </label>
+                            <span class="tooltip-icon" data-tooltip="최신 회차부터 거꾸로 세어 한 번도 나오지 않은 연속 회차 수(연속 실패 횟수)가 기준 이상인 번호를 최소 1개 이상 포함시켜 조합을 생성합니다. 예를 들어 기준을 15로 두면 15회 연속 미출현한 번호가 반드시 하나 포함됩니다.">ⓘ</span>
+                        </div>
+                        <span class="overdue-badge" id="overdue-threshold-badge">연속 3회 이상</span>
+                    </div>
+                    <div class="overdue-slider-row">
+                        <span class="overdue-scale-end">1회</span>
+                        <input type="range" class="overdue-range" id="overdue-threshold" min="1" max="17" step="1" value="3"
+                               oninput="onOverdueThresholdChange()" aria-label="연속 미출현 기준 회차">
+                        <span class="overdue-scale-end">17회</span>
+                    </div>
+                    <div class="overdue-status" id="overdue-status">역대 회차 데이터를 불러오는 중입니다...</div>
+                    <div class="overdue-candidates" id="overdue-candidates"></div>
+                </div>
+
                 <div class="gen-action-area">
                     <button class="btn btn-primary" onclick="generateCombination()" id="gen-btn">조건 충족 조합 생성하기</button>
                 </div>
@@ -1256,6 +1440,17 @@
         const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43];
         let selectedNumbers = [];
         let generatedTempNumbers = [];
+
+        // 연속 미출현(연속 실패) 기준 회차 range 설정값
+        const OVERDUE_MIN = 1;
+        const OVERDUE_MAX = 17;
+        const OVERDUE_DEFAULT = 3;
+        const OVERDUE_CHIP_LIMIT = 12;   // 후보 칩 최대 노출 개수
+
+        let drawHistory = [];                        // [{ round, numbers: [...] }] 회차 오름차순
+        let missStreaks = new Array(46).fill(0);     // 번호별 최신 회차 기준 연속 미출현 회차 수
+        let historyStatus = 'loading';               // 'loading' | 'ready' | 'failed'
+        let lastOverduePicks = [];                   // 마지막 생성 조합에 포함된 연속 미출현 번호
 
         let currentGridFilter = 'all';
 
@@ -1353,6 +1548,8 @@
             });
             prevNums.forEach(n => neighborSet.delete(n));
 
+            const overdueSet = new Set(getOverdueCandidates().map(c => c.number));
+
             for (let i = 1; i <= 45; i++) {
                 const btn = document.getElementById(`numbtn-${i}`);
                 if (!btn) continue;
@@ -1368,6 +1565,8 @@
                     match = (i % 3 === 0);
                 } else if (type === 'prevNeighbors') {
                     match = neighborSet.has(i);
+                } else if (type === 'overdue') {
+                    match = overdueSet.has(i);
                 }
                 
                 if (match || type === 'all') {
@@ -1497,6 +1696,8 @@
 
         // Update UI
         function updateUI() {
+            markOverdueChips();
+
             // Update Selected Balls Row
             const ballsContainer = document.getElementById('selected-balls');
             ballsContainer.innerHTML = '';
@@ -1729,6 +1930,124 @@
             }, 2500);
         }
 
+        /* ===== 연속 미출현(연속 실패) 번호 분석 ===== */
+
+        // 최신 회차부터 거꾸로 세어 해당 번호가 연속으로 빠진 회차 수를 구한다.
+        function computeMissStreaks(records) {
+            const streaks = new Array(46).fill(0);
+            for (let num = 1; num <= 45; num++) {
+                let streak = 0;
+                for (let i = records.length - 1; i >= 0; i--) {
+                    if (records[i].numbers.includes(num)) break;
+                    streak++;
+                }
+                streaks[num] = streak;
+            }
+            return streaks;
+        }
+
+        // range 슬라이더에서 기준 회차(1 ~ 17, 기본 3)를 읽어온다.
+        function getOverdueThreshold() {
+            const slider = document.getElementById('overdue-threshold');
+            const raw = slider ? parseInt(slider.value, 10) : OVERDUE_DEFAULT;
+            const value = Number.isInteger(raw) ? raw : OVERDUE_DEFAULT;
+            return Math.min(OVERDUE_MAX, Math.max(OVERDUE_MIN, value));
+        }
+
+        // 기준 회차 이상 연속 미출현한 번호 목록 (연속 실패가 긴 순서)
+        function getOverdueCandidates(threshold) {
+            if (historyStatus !== 'ready') return [];
+            const limit = threshold === undefined ? getOverdueThreshold() : threshold;
+            const candidates = [];
+            for (let num = 1; num <= 45; num++) {
+                if (missStreaks[num] >= limit) candidates.push({ number: num, streak: missStreaks[num] });
+            }
+            return candidates.sort((a, b) => b.streak - a.streak || a.number - b.number);
+        }
+
+        function renderOverduePanel() {
+            const badge = document.getElementById('overdue-threshold-badge');
+            const statusEl = document.getElementById('overdue-status');
+            const listEl = document.getElementById('overdue-candidates');
+            if (!badge || !statusEl || !listEl) return;
+
+            const threshold = getOverdueThreshold();
+            badge.textContent = `연속 ${threshold}회 이상`;
+
+            if (historyStatus === 'loading') {
+                statusEl.textContent = '역대 회차 데이터를 불러오는 중입니다...';
+                listEl.innerHTML = '';
+                return;
+            }
+
+            if (historyStatus === 'failed') {
+                statusEl.textContent = '역대 회차 데이터를 불러오지 못해 연속 미출현 추천을 사용할 수 없습니다.';
+                listEl.innerHTML = '';
+                const checkbox = document.getElementById('filter-overdue');
+                const slider = document.getElementById('overdue-threshold');
+                if (checkbox) { checkbox.checked = false; checkbox.disabled = true; }
+                if (slider) slider.disabled = true;
+                return;
+            }
+
+            const candidates = getOverdueCandidates(threshold);
+            const latestRound = drawHistory.length ? drawHistory[drawHistory.length - 1].round : 0;
+            statusEl.textContent = candidates.length
+                ? `${latestRound}회차 기준 · ${threshold}회 이상 연속으로 빠진 번호 ${candidates.length}개 (최장 ${candidates[0].streak}회). 생성 시 이 중 최소 1개가 반드시 포함됩니다.`
+                : `${latestRound}회차 기준 · ${threshold}회 이상 연속 미출현한 번호가 없습니다. 기준 회차를 낮춰주세요.`;
+
+            listEl.innerHTML = '';
+            // 후보가 많을 때 패널이 지나치게 길어지지 않도록 연속 실패가 긴 순으로 일부만 노출
+            const visible = candidates.slice(0, OVERDUE_CHIP_LIMIT);
+            visible.forEach(c => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'overdue-chip';
+                chip.dataset.number = c.number;
+                chip.title = `${c.number}번은 최근 ${c.streak}회 연속으로 나오지 않았습니다. 클릭하면 선택판에 반영됩니다.`;
+                chip.onclick = () => toggleNumber(c.number);
+                chip.innerHTML = `${c.number}번<span class="chip-streak">${c.streak}회</span>`;
+                listEl.appendChild(chip);
+            });
+
+            if (candidates.length > visible.length) {
+                const more = document.createElement('span');
+                more.className = 'overdue-more';
+                more.textContent = `외 ${candidates.length - visible.length}개`;
+                more.title = '번호 하이라이트 필터의 "연속 미출현"을 누르면 전체 후보를 번호판에서 볼 수 있습니다.';
+                listEl.appendChild(more);
+            }
+
+            markOverdueChips();
+        }
+
+        function markOverdueChips() {
+            const listEl = document.getElementById('overdue-candidates');
+            if (!listEl) return;
+            listEl.querySelectorAll('.overdue-chip').forEach(chip => {
+                const num = Number(chip.dataset.number);
+                chip.classList.toggle('picked', selectedNumbers.includes(num));
+            });
+        }
+
+        function onOverdueThresholdChange() {
+            renderOverduePanel();
+            if (currentGridFilter === 'overdue') setGridFilter('overdue');
+        }
+
+        function onOverdueToggle() {
+            const checkbox = document.getElementById('filter-overdue');
+            if (!checkbox || !checkbox.checked) return;
+
+            const threshold = getOverdueThreshold();
+            const candidates = getOverdueCandidates(threshold);
+            if (!candidates.length) {
+                showNotification(`연속 ${threshold}회 이상 미출현한 번호가 없습니다. 기준 회차를 낮춰주세요.`);
+                return;
+            }
+            showNotification(`연속 ${threshold}회 이상 미출현 번호 ${candidates.length}개를 추천 후보로 사용합니다.`);
+        }
+
         // SMART COMBINATION GENERATOR (Monte-Carlo method)
         function generateCombination() {
             const prevNums = getPrevDrawNumbers();
@@ -1740,8 +2059,21 @@
                 highlow: document.getElementById('filter-highlow').checked,
                 prime: document.getElementById('filter-prime').checked,
                 division: document.getElementById('filter-division').checked,
-                carry: document.getElementById('filter-carry').checked
+                carry: document.getElementById('filter-carry').checked,
+                overdue: document.getElementById('filter-overdue').checked
             };
+
+            // 연속 미출현(연속 실패) 추천: 기준 회차 이상 빠진 번호를 시드로 먼저 확보한다.
+            const overdueThreshold = getOverdueThreshold();
+            let overdueCandidates = [];
+            if (filters.overdue) {
+                overdueCandidates = getOverdueCandidates(overdueThreshold).map(c => c.number);
+                if (!overdueCandidates.length) {
+                    showNotification(`연속 ${overdueThreshold}회 이상 미출현한 번호가 없습니다. 기준 회차를 낮춰주세요.`);
+                    return;
+                }
+            }
+            const overdueSet = new Set(overdueCandidates);
 
             let attempts = 0;
             const maxAttempts = 15000;
@@ -1751,6 +2083,10 @@
             while (attempts < maxAttempts && !found) {
                 attempts++;
                 combo = [];
+                // 추천이 켜져 있으면 연속 미출현 번호 1개를 먼저 심고 나머지를 무작위로 채운다.
+                if (filters.overdue) {
+                    combo.push(overdueCandidates[Math.floor(Math.random() * overdueCandidates.length)]);
+                }
                 // Pick 6 unique random numbers
                 while (combo.length < 6) {
                     const r = Math.floor(Math.random() * 45) + 1;
@@ -1794,6 +2130,9 @@
                     const totalMatches = carryOver.length + neighbors.length;
                     if (totalMatches < 1 || totalMatches > 3) pass = false;
                 }
+                if (pass && filters.overdue) {
+                    if (!combo.some(n => overdueSet.has(n))) pass = false;
+                }
 
                 if (pass) {
                     found = true;
@@ -1802,6 +2141,7 @@
 
             if (found) {
                 generatedTempNumbers = [...combo];
+                lastOverduePicks = filters.overdue ? combo.filter(n => overdueSet.has(n)) : [];
                 displayGeneratedResult(combo, attempts);
                 showNotification(`필터를 만족하는 번호를 ${attempts}회 시도 끝에 찾았습니다!`);
             } else {
@@ -1812,15 +2152,23 @@
         function displayGeneratedResult(combo, attempts) {
             const container = document.getElementById('generated-balls');
             container.innerHTML = '';
-            
+
+            const overduePicks = new Set(lastOverduePicks);
+
             combo.forEach(num => {
                 const ball = document.createElement('div');
-                ball.className = `ball ${getBallClass(num)}`;
+                ball.className = `ball ${getBallClass(num)}${overduePicks.has(num) ? ' overdue-pick' : ''}`;
                 ball.textContent = num;
+                if (overduePicks.has(num)) ball.title = `${num}번: 최근 ${missStreaks[num]}회 연속 미출현`;
                 container.appendChild(ball);
             });
 
-            document.getElementById('gen-meta-text').textContent = `시뮬레이션 시도 횟수: ${attempts}회`;
+            let meta = `시뮬레이션 시도 횟수: ${attempts}회`;
+            if (lastOverduePicks.length) {
+                const detail = lastOverduePicks.map(n => `${n}번(${missStreaks[n]}회)`).join(', ');
+                meta += ` · 연속 미출현 포함: ${detail}`;
+            }
+            document.getElementById('gen-meta-text').textContent = meta;
             document.getElementById('generated-result-wrap').style.display = 'block';
         }
 
@@ -1855,7 +2203,12 @@
         window.onload = () => {
             initBoard();
             applyNumbersFromUrl();
-            loadLatestDrawNumbers();
+            renderOverduePanel();
+            loadDrawHistory().catch(err => {
+                console.log("역대 회차 로드 실패. 기본값을 사용합니다:", err.message);
+                historyStatus = 'failed';
+                renderOverduePanel();
+            });
         };
 
         // CSV 파서 추가
@@ -1882,62 +2235,64 @@
             return data;
         }
 
-        // DB 또는 CSV로부터 최신 번호를 가져와 입력창 자동 설정
-        function loadLatestDrawNumbers() {
-            if (typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
-                console.log("Supabase에서 최신 당첨 번호를 조회하여 직전 회차로 설정합니다...");
-                fetch(`${SUPABASE_CONFIG.url}/rest/v1/lotto_history?select=*&order=round.desc&limit=1`, {
-                    headers: {
-                        'apikey': SUPABASE_CONFIG.anonKey,
-                        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
-                    }
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error("DB API 응답 오류");
-                    return res.json();
-                })
-                .then(data => {
-                    if (data && data.length > 0) {
-                        const latest = data[0];
-                        setPrevDrawInputs(latest.round, [latest.num1, latest.num2, latest.num3, latest.num4, latest.num5, latest.num6]);
-                    } else {
-                        throw new Error("데이터가 비어 있음");
-                    }
-                })
-                .catch(err => {
-                    console.warn("최신 번호 DB 로드 실패, CSV 폴백 시도:", err.message);
-                    loadLatestDrawFromCsv();
-                });
-            } else {
-                loadLatestDrawFromCsv();
-            }
+        // DB/CSV 원본 행을 { round, numbers } 형태로 정규화하고 회차 오름차순 정렬
+        function normalizeDrawRows(rows, source) {
+            return rows
+                .map(row => ({
+                    round: Number(source === 'db' ? row.round : row['회차']),
+                    numbers: [1, 2, 3, 4, 5, 6].map(i => Number(source === 'db' ? row[`num${i}`] : row[`번호${i}`]))
+                }))
+                .filter(r => Number.isInteger(r.round) && r.numbers.every(n => Number.isInteger(n) && n >= 1 && n <= 45))
+                .sort((a, b) => a.round - b.round);
         }
 
-        function loadLatestDrawFromCsv() {
-            fetch('lotto_history.csv')
-                .then(res => {
-                    if (!res.ok) throw new Error("CSV load failed");
-                    return res.text();
-                })
-                .then(text => {
-                    const records = parseCSV(text);
-                    if (records && records.length > 0) {
-                        records.sort((a, b) => parseInt(b['회차']) - parseInt(a['회차']));
-                        const latest = records[0];
-                        const nums = [
-                            parseInt(latest['번호1']),
-                            parseInt(latest['번호2']),
-                            parseInt(latest['번호3']),
-                            parseInt(latest['번호4']),
-                            parseInt(latest['번호5']),
-                            parseInt(latest['번호6'])
-                        ];
-                        setPrevDrawInputs(parseInt(latest['회차']), nums);
+        // Supabase는 한 번의 요청에 최대 1000행만 반환하므로 Range 헤더로 나눠 받는다.
+        async function fetchAllSupabaseRows(selectQuery) {
+            const pageSize = 1000;
+            let all = [];
+            let from = 0;
+            while (true) {
+                const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/lotto_history?${selectQuery}`, {
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.anonKey,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                        'Range': `${from}-${from + pageSize - 1}`
                     }
-                })
-                .catch(err => {
-                    console.log("로컬 CSV 로드 실패. 기본값을 사용합니다:", err.message);
                 });
+                if (!res.ok) throw new Error("DB API 응답 오류");
+                const page = await res.json();
+                all = all.concat(page);
+                if (page.length < pageSize) break;
+                from += pageSize;
+            }
+            return all;
+        }
+
+        // DB 또는 CSV로부터 역대 회차를 모두 가져와 직전 회차 입력값과 연속 미출현 통계를 세팅
+        async function loadDrawHistory() {
+            try {
+                if (typeof SUPABASE_CONFIG === 'undefined' || !SUPABASE_CONFIG.url || !SUPABASE_CONFIG.anonKey) {
+                    throw new Error("Supabase 설정 없음");
+                }
+                console.log("Supabase에서 역대 당첨 번호를 조회합니다...");
+                const rows = await fetchAllSupabaseRows('select=round,num1,num2,num3,num4,num5,num6&order=round.asc');
+                drawHistory = normalizeDrawRows(rows, 'db');
+                if (!drawHistory.length) throw new Error("데이터가 비어 있음");
+            } catch (err) {
+                console.warn("역대 번호 DB 로드 실패, CSV 폴백 시도:", err.message);
+                const res = await fetch('lotto_history.csv');
+                if (!res.ok) throw new Error("CSV 로드 실패");
+                drawHistory = normalizeDrawRows(parseCSV(await res.text()), 'csv');
+                if (!drawHistory.length) throw new Error("CSV 데이터가 비어 있음");
+            }
+
+            missStreaks = computeMissStreaks(drawHistory);
+            historyStatus = 'ready';
+
+            const latest = drawHistory[drawHistory.length - 1];
+            setPrevDrawInputs(latest.round, latest.numbers);
+            renderOverduePanel();
+            if (currentGridFilter === 'overdue') setGridFilter('overdue');
         }
 
         function setPrevDrawInputs(round, nums) {
