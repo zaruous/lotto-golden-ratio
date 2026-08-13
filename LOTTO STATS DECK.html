@@ -632,10 +632,36 @@
             white-space: nowrap;
         }
 
-        .overdue-slider-row {
+        .overdue-control {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .overdue-control-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #cbd5e1;
+            min-width: 92px;
+        }
+
+        /* 모바일에서는 라벨·배지를 윗줄로, 슬라이더를 아랫줄로 배치 */
+        @media (max-width: 768px) {
+            .overdue-control {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                grid-template-areas:
+                    "label label badge"
+                    "min slider max";
+                gap: 6px 8px;
+                align-items: center;
+            }
+            .overdue-control-label { grid-area: label; }
+            .overdue-badge { grid-area: badge; justify-self: end; }
+            .overdue-control .scale-min { grid-area: min; }
+            .overdue-range { grid-area: slider; min-width: 0; }
+            .overdue-control .scale-max { grid-area: max; }
         }
 
         .overdue-scale-end {
@@ -648,6 +674,7 @@
             appearance: none;
             -webkit-appearance: none;
             flex: 1;
+            min-width: 140px;
             height: 6px;
             border-radius: 6px;
             background: linear-gradient(90deg, rgba(99, 102, 241, 0.35), rgba(245, 158, 11, 0.55));
@@ -1397,15 +1424,24 @@
                                 <input type="checkbox" id="filter-overdue" onchange="onOverdueToggle()">
                                 <span>연속 미출현(연속 실패) 번호 추천</span>
                             </label>
-                            <span class="tooltip-icon" data-tooltip="최신 회차부터 거꾸로 세어 한 번도 나오지 않은 연속 회차 수(연속 실패 횟수)가 기준 이상인 번호를 최소 1개 이상 포함시켜 조합을 생성합니다. 예를 들어 기준을 15로 두면 15회 연속 미출현한 번호가 반드시 하나 포함됩니다.">ⓘ</span>
+                            <span class="tooltip-icon" data-tooltip="최신 회차부터 거꾸로 세어 한 번도 나오지 않은 연속 회차 수(연속 실패 횟수)가 기준 이상인 번호를 정해진 개수만큼 포함시켜 조합을 생성합니다. 예를 들어 기준 15회 · 포함 3개로 두면 15회 이상 연속 미출현한 번호 3개가 반드시 들어갑니다.">ⓘ</span>
                         </div>
-                        <span class="overdue-badge" id="overdue-threshold-badge">연속 3회 이상</span>
                     </div>
-                    <div class="overdue-slider-row">
-                        <span class="overdue-scale-end">1회</span>
+                    <div class="overdue-control">
+                        <span class="overdue-control-label">연속 미출현 기준</span>
+                        <span class="overdue-scale-end scale-min">1회</span>
                         <input type="range" class="overdue-range" id="overdue-threshold" min="1" max="17" step="1" value="3"
                                oninput="onOverdueThresholdChange()" aria-label="연속 미출현 기준 회차">
-                        <span class="overdue-scale-end">17회</span>
+                        <span class="overdue-scale-end scale-max">17회</span>
+                        <span class="overdue-badge" id="overdue-threshold-badge">연속 3회 이상</span>
+                    </div>
+                    <div class="overdue-control">
+                        <span class="overdue-control-label">추천 포함 개수</span>
+                        <span class="overdue-scale-end scale-min">1개</span>
+                        <input type="range" class="overdue-range" id="overdue-count" min="1" max="3" step="1" value="3"
+                               oninput="onOverdueCountChange()" aria-label="연속 미출현 번호 포함 개수">
+                        <span class="overdue-scale-end scale-max">3개</span>
+                        <span class="overdue-badge" id="overdue-count-badge">3개 포함</span>
                     </div>
                     <div class="overdue-status" id="overdue-status">역대 회차 데이터를 불러오는 중입니다...</div>
                     <div class="overdue-candidates" id="overdue-candidates"></div>
@@ -1445,6 +1481,10 @@
         const OVERDUE_MIN = 1;
         const OVERDUE_MAX = 17;
         const OVERDUE_DEFAULT = 3;
+        // 조합에 넣을 연속 미출현 번호 개수 range 설정값
+        const OVERDUE_COUNT_MIN = 1;
+        const OVERDUE_COUNT_MAX = 3;
+        const OVERDUE_COUNT_DEFAULT = 3;
         const OVERDUE_CHIP_LIMIT = 12;   // 후보 칩 최대 노출 개수
 
         let drawHistory = [];                        // [{ round, numbers: [...] }] 회차 오름차순
@@ -1954,6 +1994,14 @@
             return Math.min(OVERDUE_MAX, Math.max(OVERDUE_MIN, value));
         }
 
+        // range 슬라이더에서 조합에 넣을 개수(1 ~ 3, 기본 3)를 읽어온다.
+        function getOverdueCount() {
+            const slider = document.getElementById('overdue-count');
+            const raw = slider ? parseInt(slider.value, 10) : OVERDUE_COUNT_DEFAULT;
+            const value = Number.isInteger(raw) ? raw : OVERDUE_COUNT_DEFAULT;
+            return Math.min(OVERDUE_COUNT_MAX, Math.max(OVERDUE_COUNT_MIN, value));
+        }
+
         // 기준 회차 이상 연속 미출현한 번호 목록 (연속 실패가 긴 순서)
         function getOverdueCandidates(threshold) {
             if (historyStatus !== 'ready') return [];
@@ -1972,7 +2020,11 @@
             if (!badge || !statusEl || !listEl) return;
 
             const threshold = getOverdueThreshold();
+            const count = getOverdueCount();
             badge.textContent = `연속 ${threshold}회 이상`;
+
+            const countBadge = document.getElementById('overdue-count-badge');
+            if (countBadge) countBadge.textContent = `${count}개 포함`;
 
             if (historyStatus === 'loading') {
                 statusEl.textContent = '역대 회차 데이터를 불러오는 중입니다...';
@@ -1984,16 +2036,23 @@
                 statusEl.textContent = '역대 회차 데이터를 불러오지 못해 연속 미출현 추천을 사용할 수 없습니다.';
                 listEl.innerHTML = '';
                 const checkbox = document.getElementById('filter-overdue');
-                const slider = document.getElementById('overdue-threshold');
                 if (checkbox) { checkbox.checked = false; checkbox.disabled = true; }
-                if (slider) slider.disabled = true;
+                ['overdue-threshold', 'overdue-count'].forEach(id => {
+                    const slider = document.getElementById(id);
+                    if (slider) slider.disabled = true;
+                });
                 return;
             }
 
             const candidates = getOverdueCandidates(threshold);
             const latestRound = drawHistory.length ? drawHistory[drawHistory.length - 1].round : 0;
+            // 후보가 요청 개수보다 적으면 있는 만큼만 넣는다.
+            const effectiveCount = Math.min(count, candidates.length);
+            const countNote = effectiveCount < count
+                ? `후보가 ${candidates.length}개뿐이라 ${effectiveCount}개만 포함됩니다.`
+                : `생성 시 이 중 ${effectiveCount}개가 반드시 포함됩니다.`;
             statusEl.textContent = candidates.length
-                ? `${latestRound}회차 기준 · ${threshold}회 이상 연속으로 빠진 번호 ${candidates.length}개 (최장 ${candidates[0].streak}회). 생성 시 이 중 최소 1개가 반드시 포함됩니다.`
+                ? `${latestRound}회차 기준 · ${threshold}회 이상 연속으로 빠진 번호 ${candidates.length}개 (최장 ${candidates[0].streak}회). ${countNote}`
                 : `${latestRound}회차 기준 · ${threshold}회 이상 연속 미출현한 번호가 없습니다. 기준 회차를 낮춰주세요.`;
 
             listEl.innerHTML = '';
@@ -2035,6 +2094,10 @@
             if (currentGridFilter === 'overdue') setGridFilter('overdue');
         }
 
+        function onOverdueCountChange() {
+            renderOverduePanel();
+        }
+
         function onOverdueToggle() {
             const checkbox = document.getElementById('filter-overdue');
             if (!checkbox || !checkbox.checked) return;
@@ -2045,7 +2108,8 @@
                 showNotification(`연속 ${threshold}회 이상 미출현한 번호가 없습니다. 기준 회차를 낮춰주세요.`);
                 return;
             }
-            showNotification(`연속 ${threshold}회 이상 미출현 번호 ${candidates.length}개를 추천 후보로 사용합니다.`);
+            const effectiveCount = Math.min(getOverdueCount(), candidates.length);
+            showNotification(`연속 ${threshold}회 이상 미출현 번호 ${candidates.length}개 중 ${effectiveCount}개를 조합에 넣습니다.`);
         }
 
         // SMART COMBINATION GENERATOR (Monte-Carlo method)
@@ -2063,15 +2127,17 @@
                 overdue: document.getElementById('filter-overdue').checked
             };
 
-            // 연속 미출현(연속 실패) 추천: 기준 회차 이상 빠진 번호를 시드로 먼저 확보한다.
+            // 연속 미출현(연속 실패) 추천: 기준 회차 이상 빠진 번호를 설정한 개수만큼 시드로 먼저 확보한다.
             const overdueThreshold = getOverdueThreshold();
             let overdueCandidates = [];
+            let overdueCount = 0;
             if (filters.overdue) {
                 overdueCandidates = getOverdueCandidates(overdueThreshold).map(c => c.number);
                 if (!overdueCandidates.length) {
                     showNotification(`연속 ${overdueThreshold}회 이상 미출현한 번호가 없습니다. 기준 회차를 낮춰주세요.`);
                     return;
                 }
+                overdueCount = Math.min(getOverdueCount(), overdueCandidates.length);
             }
             const overdueSet = new Set(overdueCandidates);
 
@@ -2083,9 +2149,10 @@
             while (attempts < maxAttempts && !found) {
                 attempts++;
                 combo = [];
-                // 추천이 켜져 있으면 연속 미출현 번호 1개를 먼저 심고 나머지를 무작위로 채운다.
-                if (filters.overdue) {
-                    combo.push(overdueCandidates[Math.floor(Math.random() * overdueCandidates.length)]);
+                // 추천이 켜져 있으면 연속 미출현 번호를 설정 개수만큼 먼저 심고 나머지를 무작위로 채운다.
+                while (combo.length < overdueCount) {
+                    const pick = overdueCandidates[Math.floor(Math.random() * overdueCandidates.length)];
+                    if (!combo.includes(pick)) combo.push(pick);
                 }
                 // Pick 6 unique random numbers
                 while (combo.length < 6) {
@@ -2131,7 +2198,7 @@
                     if (totalMatches < 1 || totalMatches > 3) pass = false;
                 }
                 if (pass && filters.overdue) {
-                    if (!combo.some(n => overdueSet.has(n))) pass = false;
+                    if (combo.filter(n => overdueSet.has(n)).length < overdueCount) pass = false;
                 }
 
                 if (pass) {
