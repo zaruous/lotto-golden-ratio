@@ -581,6 +581,177 @@
             transform: scale(1);
         }
 
+        /* 황금 조합 등장 연출 (연속 실패 구간) 패널 */
+        .drama-panel {
+            background: rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(245, 158, 11, 0.18);
+            border-radius: 14px;
+            padding: 16px 18px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .drama-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .drama-panel .filter-check-label {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .drama-panel .filter-check-label:hover {
+            background: none;
+            border-color: transparent;
+        }
+
+        .drama-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .drama-control-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #cbd5e1;
+            min-width: 92px;
+        }
+
+        .drama-scale-end {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .drama-badge {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--accent-warning);
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 20px;
+            padding: 4px 12px;
+            white-space: nowrap;
+        }
+
+        .drama-status {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* 두 핸들 구간 슬라이더: input 두 개를 겹쳐 놓고 thumb만 클릭되게 한다 */
+        .range-dual {
+            position: relative;
+            flex: 1;
+            min-width: 150px;
+            height: 22px;
+        }
+
+        .range-track,
+        .range-fill {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 6px;
+            border-radius: 6px;
+            pointer-events: none;
+        }
+
+        .range-track {
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .range-fill {
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-warning));
+        }
+
+        .range-dual input[type="range"] {
+            appearance: none;
+            -webkit-appearance: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 22px;
+            margin: 0;
+            background: none;
+            outline: none;
+            pointer-events: none;
+        }
+
+        .range-dual input[type="range"]::-webkit-slider-runnable-track {
+            background: transparent;
+            height: 22px;
+            border: none;
+        }
+
+        .range-dual input[type="range"]::-moz-range-track {
+            background: transparent;
+            height: 22px;
+            border: none;
+        }
+
+        .range-dual input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            pointer-events: auto;
+            width: 20px;
+            height: 20px;
+            margin-top: 1px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-warning));
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+            cursor: pointer;
+        }
+
+        .range-dual input[type="range"]::-moz-range-thumb {
+            pointer-events: auto;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-warning));
+            border: 2px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+            cursor: pointer;
+        }
+
+        .range-dual input[type="range"]:disabled::-webkit-slider-thumb {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* 모바일에서는 라벨·배지를 윗줄로, 슬라이더를 아랫줄로 배치 */
+        @media (max-width: 768px) {
+            .drama-control {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                grid-template-areas:
+                    "label label badge"
+                    "min slider max";
+                gap: 6px 8px;
+                align-items: center;
+            }
+            .drama-control-label { grid-area: label; }
+            .drama-badge { grid-area: badge; justify-self: end; }
+            .drama-control .scale-min { grid-area: min; }
+            .range-dual { grid-area: slider; min-width: 0; }
+            .drama-control .scale-max { grid-area: max; }
+        }
+
         .gen-action-area {
             display: flex;
             gap: 15px;
@@ -1227,6 +1398,32 @@
                     </label>
                 </div>
 
+                <!-- 황금 조합 등장 연출: 몇 번 연속 실패한 뒤에 나오게 할지 -->
+                <div class="drama-panel">
+                    <div class="drama-title-wrap">
+                        <label class="filter-check-label">
+                            <input type="checkbox" id="filter-drama" onchange="onDramaToggle()">
+                            <span>황금 조합 등장 연출 (연속 실패 구간 지정)</span>
+                        </label>
+                        <span class="tooltip-icon" data-tooltip="우수 이상(70점) 조합이 곧바로 나오지 않고, 지정한 횟수만큼 연속으로 실패한 뒤에 등장하도록 시뮬레이션을 계속 돌립니다. 예를 들어 13~14로 두면 13번 또는 14번 연속 실패한 직후 나온 조합만 추천합니다. 당첨 확률과는 무관한 연출용 기능입니다.">ⓘ</span>
+                    </div>
+                    <div class="drama-control">
+                        <span class="drama-control-label">연속 실패 횟수</span>
+                        <span class="drama-scale-end scale-min">0회</span>
+                        <div class="range-dual">
+                            <div class="range-track"></div>
+                            <div class="range-fill" id="drama-range-fill"></div>
+                            <input type="range" id="drama-min" min="0" max="17" step="1" value="0"
+                                   oninput="onDramaRangeChange('min')" aria-label="연속 실패 최소 횟수">
+                            <input type="range" id="drama-max" min="0" max="17" step="1" value="17"
+                                   oninput="onDramaRangeChange('max')" aria-label="연속 실패 최대 횟수">
+                        </div>
+                        <span class="drama-scale-end scale-max">17회+</span>
+                        <span class="drama-badge" id="drama-range-badge">0 ~ 17회 이상</span>
+                    </div>
+                    <div class="drama-status" id="drama-status"></div>
+                </div>
+
                 <div class="gen-action-area">
                     <button class="btn btn-primary" onclick="generateCombination()" id="gen-btn">조건 충족 조합 생성하기</button>
                 </div>
@@ -1256,6 +1453,14 @@
         const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43];
         let selectedNumbers = [];
         let generatedTempNumbers = [];
+
+        // 황금 조합 등장 연출: 연속 실패 횟수 구간 (상단 핸들 17은 "17회 이상" = 상한 없음)
+        const DRAMA_MIN = 0;
+        const DRAMA_MAX = 17;
+        const HARMONY_GOOD_SCORE = 70;      // 우수 이상(우수·황금) 등급 컷
+        const DRAMA_MAX_ATTEMPTS = 1000000; // 연출 모드에서 허용할 총 시뮬레이션 횟수
+
+        let lastGenSummary = '';            // 생성 결과 하단에 표시할 요약 문구
 
         let currentGridFilter = 'all';
 
@@ -1546,11 +1751,11 @@
             const { carryOver, neighbors } = getPreviousDrawMatches(selectedNumbers, prevNums);
 
             // Scoring variables
-            let score = 0;
+            // 점수 산식은 getHarmonyScore()에 모아 두고 생성기 판정과 동일하게 사용한다.
+            const score = getHarmonyScore(selectedNumbers);
 
             // 1. Sum
             const sumPass = sum >= 100 && sum <= 175;
-            score += sumPass ? 20 : ( (sum >= 90 && sum < 100) || (sum > 175 && sum <= 185) ? 10 : 0 );
             const statusSum = document.getElementById('status-sum');
             statusSum.textContent = sumPass ? "합격" : "불합격";
             statusSum.className = `status-badge ${sumPass ? 'pass' : 'fail'}`;
@@ -1559,7 +1764,6 @@
 
             // 2. AC
             const acPass = ac >= 7 && ac <= 10;
-            score += acPass ? 20 : (ac === 6 ? 10 : 0);
             const statusAC = document.getElementById('status-ac');
             statusAC.textContent = acPass ? "합격" : "불합격";
             statusAC.className = `status-badge ${acPass ? 'pass' : 'fail'}`;
@@ -1569,7 +1773,6 @@
             // 3. Odd/Even
             const oddRatioStr = `${odd}:${even}`;
             const oddPass = oddRatioStr === '3:3' || oddRatioStr === '2:4' || oddRatioStr === '4:2';
-            score += oddRatioStr === '3:3' ? 20 : (oddPass ? 15 : 0);
             const statusOdd = document.getElementById('status-oddeven');
             statusOdd.textContent = oddPass ? "균형" : "불균형";
             statusOdd.className = `status-badge ${oddPass ? 'pass' : 'fail'}`;
@@ -1581,7 +1784,6 @@
             // 4. High/Low
             const hlRatioStr = `${low}:${high}`;
             const hlPass = hlRatioStr === '3:3' || hlRatioStr === '2:4' || hlRatioStr === '4:2';
-            score += hlRatioStr === '3:3' ? 15 : (hlPass ? 10 : 0);
             const statusHL = document.getElementById('status-highlow');
             statusHL.textContent = hlPass ? "균형" : "불균형";
             statusHL.className = `status-badge ${hlPass ? 'pass' : 'fail'}`;
@@ -1592,7 +1794,6 @@
 
             // 5. Prime
             const primePass = primeCount >= 1 && primeCount <= 3;
-            score += primePass ? 15 : (primeCount === 0 || primeCount === 4 ? 5 : 0);
             const statusPrime = document.getElementById('status-prime');
             statusPrime.textContent = primePass ? "적정" : "미달/초과";
             statusPrime.className = `status-badge ${primePass ? 'pass' : 'fail'}`;
@@ -1602,7 +1803,6 @@
 
             // 6. 3-Division
             const divPass = g1 <= 4 && g2 <= 4 && g3 <= 4;
-            score += divPass ? 10 : 0;
             const statusDiv = document.getElementById('status-division');
             statusDiv.textContent = divPass ? "안정" : "편중";
             statusDiv.className = `status-badge ${divPass ? 'pass' : 'fail'}`;
@@ -1729,10 +1929,161 @@
             }, 2500);
         }
 
+        /* ===== 하모니 점수 (선택 조합 · 생성 조합 공용) ===== */
+
+        // 6개 번호의 통계 하모니 점수(100점 만점). 등급 컷: 90 황금 / 70 우수 / 50 보통
+        function getHarmonyScore(nums) {
+            if (!nums || nums.length < 6) return 0;
+
+            let score = 0;
+
+            const sum = nums.reduce((a, b) => a + b, 0);
+            score += (sum >= 100 && sum <= 175) ? 20 : (((sum >= 90 && sum < 100) || (sum > 175 && sum <= 185)) ? 10 : 0);
+
+            const ac = getACValue(nums);
+            score += (ac >= 7 && ac <= 10) ? 20 : (ac === 6 ? 10 : 0);
+
+            const { odd, even } = getOddEvenRatio(nums);
+            const oddRatioStr = `${odd}:${even}`;
+            score += oddRatioStr === '3:3' ? 20 : (['2:4', '4:2'].includes(oddRatioStr) ? 15 : 0);
+
+            const { low, high } = getHighLowRatio(nums);
+            const hlRatioStr = `${low}:${high}`;
+            score += hlRatioStr === '3:3' ? 15 : (['2:4', '4:2'].includes(hlRatioStr) ? 10 : 0);
+
+            const primeCount = getPrimeCount(nums);
+            score += (primeCount >= 1 && primeCount <= 3) ? 15 : ((primeCount === 0 || primeCount === 4) ? 5 : 0);
+
+            const { g1, g2, g3 } = get3DivisionDistribution(nums);
+            score += (g1 <= 4 && g2 <= 4 && g3 <= 4) ? 10 : 0;
+
+            return score;
+        }
+
+        function getHarmonyGrade(score) {
+            if (score >= 90) return '황금 조화';
+            if (score >= 70) return '우수 조합';
+            if (score >= 50) return '보통 조합';
+            return '불균형 조합';
+        }
+
+        /* ===== 황금 조합 등장 연출 (연속 실패 구간) ===== */
+
+        // 두 핸들에서 연속 실패 횟수 구간 [min, max]를 읽어온다. (기본 0 ~ 17)
+        function getDramaRange() {
+            const read = (id, fallback) => {
+                const slider = document.getElementById(id);
+                const raw = slider ? parseInt(slider.value, 10) : fallback;
+                const value = Number.isInteger(raw) ? raw : fallback;
+                return Math.min(DRAMA_MAX, Math.max(DRAMA_MIN, value));
+            };
+            const a = read('drama-min', DRAMA_MIN);
+            const b = read('drama-max', DRAMA_MAX);
+            return { min: Math.min(a, b), max: Math.max(a, b) };
+        }
+
+        // 한쪽 핸들을 넘겨서 끌면 반대쪽 핸들을 밀어 구간이 뒤집히지 않게 한다.
+        function onDramaRangeChange(moved) {
+            const minEl = document.getElementById('drama-min');
+            const maxEl = document.getElementById('drama-max');
+            if (!minEl || !maxEl) return;
+
+            const minVal = parseInt(minEl.value, 10);
+            const maxVal = parseInt(maxEl.value, 10);
+            if (minVal > maxVal) {
+                if (moved === 'min') maxEl.value = minVal;
+                else minEl.value = maxVal;
+            }
+
+            // 두 핸들이 겹쳐도 잡을 수 있도록 가까운 쪽을 위로 올린다.
+            const mid = (DRAMA_MIN + DRAMA_MAX) / 2;
+            minEl.style.zIndex = parseInt(minEl.value, 10) > mid ? '4' : '3';
+            maxEl.style.zIndex = parseInt(minEl.value, 10) > mid ? '3' : '4';
+
+            renderDramaPanel();
+        }
+
+        function renderDramaPanel() {
+            const badge = document.getElementById('drama-range-badge');
+            const fill = document.getElementById('drama-range-fill');
+            const statusEl = document.getElementById('drama-status');
+            if (!badge || !fill || !statusEl) return;
+
+            const { min, max } = getDramaRange();
+            const openEnded = max >= DRAMA_MAX;
+            badge.textContent = `${min} ~ ${max}회${openEnded ? ' 이상' : ''}`;
+
+            const span = DRAMA_MAX - DRAMA_MIN;
+            fill.style.left = `${((min - DRAMA_MIN) / span) * 100}%`;
+            fill.style.width = `${((max - min) / span) * 100}%`;
+
+            const enabled = document.getElementById('filter-drama');
+            if (enabled && !enabled.checked) {
+                statusEl.textContent = '체크하면 지정한 횟수만큼 연속 실패한 뒤에 나온 조합만 추천합니다. (당첨 확률과 무관한 연출 기능)';
+                return;
+            }
+            statusEl.textContent = min === 0 && openEnded
+                ? '실패 횟수를 가리지 않습니다. 우수 이상(70점) 조합이 처음 나오는 즉시 추천합니다.'
+                : `우수 이상(70점) 조합이 ${min}~${max}회${openEnded ? ' 이상' : ''} 연속 실패한 직후에 나올 때까지 시뮬레이션을 반복합니다.`;
+        }
+
+        function onDramaToggle() {
+            renderDramaPanel();
+            const enabled = document.getElementById('filter-drama');
+            if (!enabled || !enabled.checked) return;
+
+            const { min, max } = getDramaRange();
+            const openEnded = max >= DRAMA_MAX;
+            showNotification(`${min}~${max}회${openEnded ? ' 이상' : ''} 연속 실패한 뒤 나온 조합만 추천합니다.`);
+        }
+
+        // 활성화된 통계 필터를 모두 통과하는지 검사
+        function passesActiveFilters(combo, filters, prevNums) {
+            if (filters.sum) {
+                const sum = combo.reduce((a, b) => a + b, 0);
+                if (sum < 100 || sum > 175) return false;
+            }
+            if (filters.ac) {
+                const ac = getACValue(combo);
+                if (ac < 7 || ac > 10) return false;
+            }
+            if (filters.oddeven) {
+                const { odd, even } = getOddEvenRatio(combo);
+                if (!['3:3', '2:4', '4:2'].includes(`${odd}:${even}`)) return false;
+            }
+            if (filters.highlow) {
+                const { low, high } = getHighLowRatio(combo);
+                if (!['3:3', '2:4', '4:2'].includes(`${low}:${high}`)) return false;
+            }
+            if (filters.prime) {
+                const primeCount = getPrimeCount(combo);
+                if (primeCount < 1 || primeCount > 3) return false;
+            }
+            if (filters.division) {
+                const { g1, g2, g3 } = get3DivisionDistribution(combo);
+                if (g1 > 4 || g2 > 4 || g3 > 4) return false;
+            }
+            if (filters.carry) {
+                const { carryOver, neighbors } = getPreviousDrawMatches(combo, prevNums);
+                const totalMatches = carryOver.length + neighbors.length;
+                if (totalMatches < 1 || totalMatches > 3) return false;
+            }
+            return true;
+        }
+
+        function drawRandomCombo() {
+            const combo = [];
+            while (combo.length < 6) {
+                const r = Math.floor(Math.random() * 45) + 1;
+                if (!combo.includes(r)) combo.push(r);
+            }
+            return combo.sort((a, b) => a - b);
+        }
+
         // SMART COMBINATION GENERATOR (Monte-Carlo method)
         function generateCombination() {
             const prevNums = getPrevDrawNumbers();
-            
+
             const filters = {
                 sum: document.getElementById('filter-sum').checked,
                 ac: document.getElementById('filter-ac').checked,
@@ -1743,70 +2094,79 @@
                 carry: document.getElementById('filter-carry').checked
             };
 
-            let attempts = 0;
-            const maxAttempts = 15000;
+            const dramaOn = document.getElementById('filter-drama').checked;
+            const { min: failMin, max: failMax } = getDramaRange();
+            const openEnded = failMax >= DRAMA_MAX;   // 상단 핸들이 17이면 상한 없음
+
+            const maxAttempts = dramaOn ? DRAMA_MAX_ATTEMPTS : 15000;
+            let attempts = 0;          // 총 시뮬레이션 횟수
+            let roundFails = 0;        // 이번 라운드에서 연속으로 실패한 횟수
             let found = false;
             let combo = [];
+            let acceptedFails = 0;
+            let fallback = null;       // 구간을 못 맞췄을 때 보여줄 마지막 통과 조합
 
             while (attempts < maxAttempts && !found) {
                 attempts++;
-                combo = [];
-                // Pick 6 unique random numbers
-                while (combo.length < 6) {
-                    const r = Math.floor(Math.random() * 45) + 1;
-                    if (!combo.includes(r)) {
-                        combo.push(r);
-                    }
-                }
-                combo.sort((a, b) => a - b);
+                combo = drawRandomCombo();
 
-                // Check against active filters
-                let pass = true;
+                // 연출 모드에서는 필터 통과 + 우수 이상(70점)이어야 '성공'으로 친다.
+                const pass = passesActiveFilters(combo, filters, prevNums) &&
+                    (!dramaOn || getHarmonyScore(combo) >= HARMONY_GOOD_SCORE);
 
-                if (filters.sum) {
-                    const sum = combo.reduce((a, b) => a + b, 0);
-                    if (sum < 100 || sum > 175) pass = false;
-                }
-                if (pass && filters.ac) {
-                    const ac = getACValue(combo);
-                    if (ac < 7 || ac > 10) pass = false;
-                }
-                if (pass && filters.oddeven) {
-                    const { odd, even } = getOddEvenRatio(combo);
-                    const oddRatioStr = `${odd}:${even}`;
-                    if (oddRatioStr !== '3:3' && oddRatioStr !== '2:4' && oddRatioStr !== '4:2') pass = false;
-                }
-                if (pass && filters.highlow) {
-                    const { low, high } = getHighLowRatio(combo);
-                    const hlRatioStr = `${low}:${high}`;
-                    if (hlRatioStr !== '3:3' && hlRatioStr !== '2:4' && hlRatioStr !== '4:2') pass = false;
-                }
-                if (pass && filters.prime) {
-                    const primeCount = getPrimeCount(combo);
-                    if (primeCount < 1 || primeCount > 3) pass = false;
-                }
-                if (pass && filters.division) {
-                    const { g1, g2, g3 } = get3DivisionDistribution(combo);
-                    if (g1 > 4 || g2 > 4 || g3 > 4) pass = false;
-                }
-                if (pass && filters.carry) {
-                    const { carryOver, neighbors } = getPreviousDrawMatches(combo, prevNums);
-                    const totalMatches = carryOver.length + neighbors.length;
-                    if (totalMatches < 1 || totalMatches > 3) pass = false;
+                if (!pass) {
+                    roundFails++;
+                    // 이미 상한을 넘긴 라운드는 성공해도 버려지므로 바로 다음 라운드로 넘긴다.
+                    if (dramaOn && !openEnded && roundFails > failMax) roundFails = 0;
+                    continue;
                 }
 
-                if (pass) {
+                if (!dramaOn) {
                     found = true;
+                    break;
                 }
+
+                fallback = { combo: [...combo], fails: roundFails };
+                if (roundFails >= failMin && (openEnded || roundFails <= failMax)) {
+                    acceptedFails = roundFails;
+                    found = true;
+                    break;
+                }
+                roundFails = 0;   // 구간을 벗어난 성공 → 다음 라운드 시작
+            }
+
+            if (!found && dramaOn && fallback) {
+                // 구간을 못 맞춘 경우, 마지막으로 찾은 조합을 그대로 쓰되 사실대로 알린다.
+                combo = fallback.combo;
+                acceptedFails = fallback.fails;
+                generatedTempNumbers = [...combo];
+                lastGenSummary = buildGenSummary(attempts, acceptedFails, combo, true);
+                displayGeneratedResult(combo, attempts);
+                showNotification(`${failMin}~${failMax}회 구간을 ${attempts.toLocaleString()}회 시뮬레이션 안에 맞추지 못해 마지막 조합을 보여드립니다.`);
+                return;
             }
 
             if (found) {
                 generatedTempNumbers = [...combo];
+                lastGenSummary = buildGenSummary(attempts, acceptedFails, combo, false);
                 displayGeneratedResult(combo, attempts);
-                showNotification(`필터를 만족하는 번호를 ${attempts}회 시도 끝에 찾았습니다!`);
+                showNotification(dramaOn
+                    ? `${acceptedFails}회 연속 실패 끝에 ${acceptedFails + 1}번째 시도에서 ${getHarmonyGrade(getHarmonyScore(combo))} 조합이 나왔습니다!`
+                    : `필터를 만족하는 번호를 ${attempts}회 시도 끝에 찾았습니다!`);
             } else {
                 showNotification("조건을 만족하는 조합을 찾지 못했습니다. 필터를 줄이거나 조정해 주세요.");
             }
+        }
+
+        // 생성 결과 하단에 보여줄 요약 문구
+        function buildGenSummary(attempts, fails, combo, missedRange) {
+            if (!document.getElementById('filter-drama').checked) {
+                return `시뮬레이션 시도 횟수: ${attempts.toLocaleString()}회`;
+            }
+            const score = getHarmonyScore(combo);
+            const head = `총 시뮬레이션 ${attempts.toLocaleString()}회 · ${fails}회 연속 실패 후 ${fails + 1}번째 시도에서 등장`;
+            const tail = ` · 하모니 ${score}점 (${getHarmonyGrade(score)})`;
+            return `${head}${tail}${missedRange ? ' · 지정 구간에는 도달하지 못했습니다' : ''}`;
         }
 
         function displayGeneratedResult(combo, attempts) {
@@ -1820,7 +2180,8 @@
                 container.appendChild(ball);
             });
 
-            document.getElementById('gen-meta-text').textContent = `시뮬레이션 시도 횟수: ${attempts}회`;
+            document.getElementById('gen-meta-text').textContent =
+                lastGenSummary || `시뮬레이션 시도 횟수: ${attempts.toLocaleString()}회`;
             document.getElementById('generated-result-wrap').style.display = 'block';
         }
 
@@ -1855,6 +2216,7 @@
         window.onload = () => {
             initBoard();
             applyNumbersFromUrl();
+            onDramaRangeChange('init');
             loadLatestDrawNumbers();
         };
 
