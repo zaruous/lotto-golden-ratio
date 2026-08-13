@@ -581,8 +581,8 @@
             transform: scale(1);
         }
 
-        /* Overdue (연속 미출현) Recommendation Panel */
-        .overdue-panel {
+        /* 황금 조합 등장 연출 (연속 실패 구간) 패널 */
+        .drama-panel {
             background: rgba(15, 23, 42, 0.35);
             border: 1px solid rgba(245, 158, 11, 0.18);
             border-radius: 14px;
@@ -593,21 +593,13 @@
             gap: 12px;
         }
 
-        .overdue-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .overdue-title-wrap {
+        .drama-title-wrap {
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .overdue-head .filter-check-label {
+        .drama-panel .filter-check-label {
             background: none;
             border: none;
             padding: 0;
@@ -616,12 +608,32 @@
             color: #fff;
         }
 
-        .overdue-head .filter-check-label:hover {
+        .drama-panel .filter-check-label:hover {
             background: none;
             border-color: transparent;
         }
 
-        .overdue-badge {
+        .drama-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .drama-control-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #cbd5e1;
+            min-width: 92px;
+        }
+
+        .drama-scale-end {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .drama-badge {
             font-size: 0.78rem;
             font-weight: 800;
             color: var(--accent-warning);
@@ -632,61 +644,73 @@
             white-space: nowrap;
         }
 
-        .overdue-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .overdue-control-label {
+        .drama-status {
             font-size: 0.78rem;
-            font-weight: 700;
-            color: #cbd5e1;
-            min-width: 92px;
-        }
-
-        /* 모바일에서는 라벨·배지를 윗줄로, 슬라이더를 아랫줄로 배치 */
-        @media (max-width: 768px) {
-            .overdue-control {
-                display: grid;
-                grid-template-columns: auto 1fr auto;
-                grid-template-areas:
-                    "label label badge"
-                    "min slider max";
-                gap: 6px 8px;
-                align-items: center;
-            }
-            .overdue-control-label { grid-area: label; }
-            .overdue-badge { grid-area: badge; justify-self: end; }
-            .overdue-control .scale-min { grid-area: min; }
-            .overdue-range { grid-area: slider; min-width: 0; }
-            .overdue-control .scale-max { grid-area: max; }
-        }
-
-        .overdue-scale-end {
-            font-size: 0.72rem;
             color: var(--text-muted);
-            white-space: nowrap;
+            line-height: 1.5;
         }
 
-        .overdue-range {
-            appearance: none;
-            -webkit-appearance: none;
+        /* 두 핸들 구간 슬라이더: input 두 개를 겹쳐 놓고 thumb만 클릭되게 한다 */
+        .range-dual {
+            position: relative;
             flex: 1;
-            min-width: 140px;
+            min-width: 150px;
+            height: 22px;
+        }
+
+        .range-track,
+        .range-fill {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
             height: 6px;
             border-radius: 6px;
-            background: linear-gradient(90deg, rgba(99, 102, 241, 0.35), rgba(245, 158, 11, 0.55));
-            outline: none;
-            cursor: pointer;
+            pointer-events: none;
         }
 
-        .overdue-range::-webkit-slider-thumb {
+        .range-track {
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .range-fill {
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-warning));
+        }
+
+        .range-dual input[type="range"] {
+            appearance: none;
+            -webkit-appearance: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 22px;
+            margin: 0;
+            background: none;
+            outline: none;
+            pointer-events: none;
+        }
+
+        .range-dual input[type="range"]::-webkit-slider-runnable-track {
+            background: transparent;
+            height: 22px;
+            border: none;
+        }
+
+        .range-dual input[type="range"]::-moz-range-track {
+            background: transparent;
+            height: 22px;
+            border: none;
+        }
+
+        .range-dual input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
+            pointer-events: auto;
             width: 20px;
             height: 20px;
+            margin-top: 1px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-warning));
             border: 2px solid rgba(255, 255, 255, 0.85);
@@ -694,7 +718,8 @@
             cursor: pointer;
         }
 
-        .overdue-range::-moz-range-thumb {
+        .range-dual input[type="range"]::-moz-range-thumb {
+            pointer-events: auto;
             width: 18px;
             height: 18px;
             border-radius: 50%;
@@ -704,69 +729,27 @@
             cursor: pointer;
         }
 
-        .overdue-range:disabled {
+        .range-dual input[type="range"]:disabled::-webkit-slider-thumb {
             opacity: 0.4;
             cursor: not-allowed;
         }
 
-        .overdue-status {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        .overdue-candidates {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .overdue-chip {
-            display: inline-flex;
-            align-items: baseline;
-            gap: 5px;
-            font-family: inherit;
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: #fde68a;
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.25);
-            border-radius: 20px;
-            padding: 5px 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .overdue-chip:hover {
-            background: rgba(245, 158, 11, 0.2);
-            transform: translateY(-1px);
-        }
-
-        .overdue-chip.picked {
-            background: rgba(245, 158, 11, 0.28);
-            border-color: var(--accent-warning);
-            color: #fff;
-        }
-
-        .overdue-chip .chip-streak {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .overdue-chip.picked .chip-streak {
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .overdue-more {
-            align-self: center;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .ball.overdue-pick {
-            outline: 2px solid var(--accent-warning);
-            outline-offset: 2px;
+        /* 모바일에서는 라벨·배지를 윗줄로, 슬라이더를 아랫줄로 배치 */
+        @media (max-width: 768px) {
+            .drama-control {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                grid-template-areas:
+                    "label label badge"
+                    "min slider max";
+                gap: 6px 8px;
+                align-items: center;
+            }
+            .drama-control-label { grid-area: label; }
+            .drama-badge { grid-area: badge; justify-self: end; }
+            .drama-control .scale-min { grid-area: min; }
+            .range-dual { grid-area: slider; min-width: 0; }
+            .drama-control .scale-max { grid-area: max; }
         }
 
         .gen-action-area {
@@ -1142,7 +1125,6 @@
                         <button class="filter-chip" onclick="setGridFilter('prime')" data-tooltip="1과 자기 자신으로만 나누어지는 소수(2, 3, 5, 7, 11...)만 밝게 표시합니다.">소수</button>
                         <button class="filter-chip" onclick="setGridFilter('multiple3')" data-tooltip="3의 배수(3, 6, 9, 12, 15...)만 밝게 표시합니다.">3의 배수</button>
                         <button class="filter-chip" onclick="setGridFilter('prevNeighbors')" data-tooltip="설정된 직전 회차 당첨 번호의 양옆 숫자(이웃수)만 밝게 표시합니다.">이웃수</button>
-                        <button class="filter-chip" onclick="setGridFilter('overdue')" data-tooltip="아래 생성기에서 설정한 '연속 미출현 기준 회차' 이상 연속으로 빠진 번호만 밝게 표시합니다.">연속 미출현</button>
                     </div>
                 </div>
 
@@ -1416,35 +1398,30 @@
                     </label>
                 </div>
 
-                <!-- 연속 미출현(연속 실패) 번호 추천 -->
-                <div class="overdue-panel">
-                    <div class="overdue-head">
-                        <div class="overdue-title-wrap">
-                            <label class="filter-check-label">
-                                <input type="checkbox" id="filter-overdue" onchange="onOverdueToggle()">
-                                <span>연속 미출현(연속 실패) 번호 추천</span>
-                            </label>
-                            <span class="tooltip-icon" data-tooltip="최신 회차부터 거꾸로 세어 한 번도 나오지 않은 연속 회차 수(연속 실패 횟수)가 기준 이상인 번호를 정해진 개수만큼 포함시켜 조합을 생성합니다. 예를 들어 기준 15회 · 포함 3개로 두면 15회 이상 연속 미출현한 번호 3개가 반드시 들어갑니다.">ⓘ</span>
+                <!-- 황금 조합 등장 연출: 몇 번 연속 실패한 뒤에 나오게 할지 -->
+                <div class="drama-panel">
+                    <div class="drama-title-wrap">
+                        <label class="filter-check-label">
+                            <input type="checkbox" id="filter-drama" onchange="onDramaToggle()">
+                            <span>황금 조합 등장 연출 (연속 실패 구간 지정)</span>
+                        </label>
+                        <span class="tooltip-icon" data-tooltip="우수 이상(70점) 조합이 곧바로 나오지 않고, 지정한 횟수만큼 연속으로 실패한 뒤에 등장하도록 시뮬레이션을 계속 돌립니다. 예를 들어 13~14로 두면 13번 또는 14번 연속 실패한 직후 나온 조합만 추천합니다. 당첨 확률과는 무관한 연출용 기능입니다.">ⓘ</span>
+                    </div>
+                    <div class="drama-control">
+                        <span class="drama-control-label">연속 실패 횟수</span>
+                        <span class="drama-scale-end scale-min">0회</span>
+                        <div class="range-dual">
+                            <div class="range-track"></div>
+                            <div class="range-fill" id="drama-range-fill"></div>
+                            <input type="range" id="drama-min" min="0" max="17" step="1" value="0"
+                                   oninput="onDramaRangeChange('min')" aria-label="연속 실패 최소 횟수">
+                            <input type="range" id="drama-max" min="0" max="17" step="1" value="17"
+                                   oninput="onDramaRangeChange('max')" aria-label="연속 실패 최대 횟수">
                         </div>
+                        <span class="drama-scale-end scale-max">17회+</span>
+                        <span class="drama-badge" id="drama-range-badge">0 ~ 17회 이상</span>
                     </div>
-                    <div class="overdue-control">
-                        <span class="overdue-control-label">연속 미출현 기준</span>
-                        <span class="overdue-scale-end scale-min">1회</span>
-                        <input type="range" class="overdue-range" id="overdue-threshold" min="1" max="17" step="1" value="3"
-                               oninput="onOverdueThresholdChange()" aria-label="연속 미출현 기준 회차">
-                        <span class="overdue-scale-end scale-max">17회</span>
-                        <span class="overdue-badge" id="overdue-threshold-badge">연속 3회 이상</span>
-                    </div>
-                    <div class="overdue-control">
-                        <span class="overdue-control-label">추천 포함 개수</span>
-                        <span class="overdue-scale-end scale-min">1개</span>
-                        <input type="range" class="overdue-range" id="overdue-count" min="1" max="3" step="1" value="3"
-                               oninput="onOverdueCountChange()" aria-label="연속 미출현 번호 포함 개수">
-                        <span class="overdue-scale-end scale-max">3개</span>
-                        <span class="overdue-badge" id="overdue-count-badge">3개 포함</span>
-                    </div>
-                    <div class="overdue-status" id="overdue-status">역대 회차 데이터를 불러오는 중입니다...</div>
-                    <div class="overdue-candidates" id="overdue-candidates"></div>
+                    <div class="drama-status" id="drama-status"></div>
                 </div>
 
                 <div class="gen-action-area">
@@ -1477,20 +1454,13 @@
         let selectedNumbers = [];
         let generatedTempNumbers = [];
 
-        // 연속 미출현(연속 실패) 기준 회차 range 설정값
-        const OVERDUE_MIN = 1;
-        const OVERDUE_MAX = 17;
-        const OVERDUE_DEFAULT = 3;
-        // 조합에 넣을 연속 미출현 번호 개수 range 설정값
-        const OVERDUE_COUNT_MIN = 1;
-        const OVERDUE_COUNT_MAX = 3;
-        const OVERDUE_COUNT_DEFAULT = 3;
-        const OVERDUE_CHIP_LIMIT = 12;   // 후보 칩 최대 노출 개수
+        // 황금 조합 등장 연출: 연속 실패 횟수 구간 (상단 핸들 17은 "17회 이상" = 상한 없음)
+        const DRAMA_MIN = 0;
+        const DRAMA_MAX = 17;
+        const HARMONY_GOOD_SCORE = 70;      // 우수 이상(우수·황금) 등급 컷
+        const DRAMA_MAX_ATTEMPTS = 1000000; // 연출 모드에서 허용할 총 시뮬레이션 횟수
 
-        let drawHistory = [];                        // [{ round, numbers: [...] }] 회차 오름차순
-        let missStreaks = new Array(46).fill(0);     // 번호별 최신 회차 기준 연속 미출현 회차 수
-        let historyStatus = 'loading';               // 'loading' | 'ready' | 'failed'
-        let lastOverduePicks = [];                   // 마지막 생성 조합에 포함된 연속 미출현 번호
+        let lastGenSummary = '';            // 생성 결과 하단에 표시할 요약 문구
 
         let currentGridFilter = 'all';
 
@@ -1588,8 +1558,6 @@
             });
             prevNums.forEach(n => neighborSet.delete(n));
 
-            const overdueSet = new Set(getOverdueCandidates().map(c => c.number));
-
             for (let i = 1; i <= 45; i++) {
                 const btn = document.getElementById(`numbtn-${i}`);
                 if (!btn) continue;
@@ -1605,8 +1573,6 @@
                     match = (i % 3 === 0);
                 } else if (type === 'prevNeighbors') {
                     match = neighborSet.has(i);
-                } else if (type === 'overdue') {
-                    match = overdueSet.has(i);
                 }
                 
                 if (match || type === 'all') {
@@ -1736,8 +1702,6 @@
 
         // Update UI
         function updateUI() {
-            markOverdueChips();
-
             // Update Selected Balls Row
             const ballsContainer = document.getElementById('selected-balls');
             ballsContainer.innerHTML = '';
@@ -1787,11 +1751,11 @@
             const { carryOver, neighbors } = getPreviousDrawMatches(selectedNumbers, prevNums);
 
             // Scoring variables
-            let score = 0;
+            // 점수 산식은 getHarmonyScore()에 모아 두고 생성기 판정과 동일하게 사용한다.
+            const score = getHarmonyScore(selectedNumbers);
 
             // 1. Sum
             const sumPass = sum >= 100 && sum <= 175;
-            score += sumPass ? 20 : ( (sum >= 90 && sum < 100) || (sum > 175 && sum <= 185) ? 10 : 0 );
             const statusSum = document.getElementById('status-sum');
             statusSum.textContent = sumPass ? "합격" : "불합격";
             statusSum.className = `status-badge ${sumPass ? 'pass' : 'fail'}`;
@@ -1800,7 +1764,6 @@
 
             // 2. AC
             const acPass = ac >= 7 && ac <= 10;
-            score += acPass ? 20 : (ac === 6 ? 10 : 0);
             const statusAC = document.getElementById('status-ac');
             statusAC.textContent = acPass ? "합격" : "불합격";
             statusAC.className = `status-badge ${acPass ? 'pass' : 'fail'}`;
@@ -1810,7 +1773,6 @@
             // 3. Odd/Even
             const oddRatioStr = `${odd}:${even}`;
             const oddPass = oddRatioStr === '3:3' || oddRatioStr === '2:4' || oddRatioStr === '4:2';
-            score += oddRatioStr === '3:3' ? 20 : (oddPass ? 15 : 0);
             const statusOdd = document.getElementById('status-oddeven');
             statusOdd.textContent = oddPass ? "균형" : "불균형";
             statusOdd.className = `status-badge ${oddPass ? 'pass' : 'fail'}`;
@@ -1822,7 +1784,6 @@
             // 4. High/Low
             const hlRatioStr = `${low}:${high}`;
             const hlPass = hlRatioStr === '3:3' || hlRatioStr === '2:4' || hlRatioStr === '4:2';
-            score += hlRatioStr === '3:3' ? 15 : (hlPass ? 10 : 0);
             const statusHL = document.getElementById('status-highlow');
             statusHL.textContent = hlPass ? "균형" : "불균형";
             statusHL.className = `status-badge ${hlPass ? 'pass' : 'fail'}`;
@@ -1833,7 +1794,6 @@
 
             // 5. Prime
             const primePass = primeCount >= 1 && primeCount <= 3;
-            score += primePass ? 15 : (primeCount === 0 || primeCount === 4 ? 5 : 0);
             const statusPrime = document.getElementById('status-prime');
             statusPrime.textContent = primePass ? "적정" : "미달/초과";
             statusPrime.className = `status-badge ${primePass ? 'pass' : 'fail'}`;
@@ -1843,7 +1803,6 @@
 
             // 6. 3-Division
             const divPass = g1 <= 4 && g2 <= 4 && g3 <= 4;
-            score += divPass ? 10 : 0;
             const statusDiv = document.getElementById('status-division');
             statusDiv.textContent = divPass ? "안정" : "편중";
             statusDiv.className = `status-badge ${divPass ? 'pass' : 'fail'}`;
@@ -1970,152 +1929,161 @@
             }, 2500);
         }
 
-        /* ===== 연속 미출현(연속 실패) 번호 분석 ===== */
+        /* ===== 하모니 점수 (선택 조합 · 생성 조합 공용) ===== */
 
-        // 최신 회차부터 거꾸로 세어 해당 번호가 연속으로 빠진 회차 수를 구한다.
-        function computeMissStreaks(records) {
-            const streaks = new Array(46).fill(0);
-            for (let num = 1; num <= 45; num++) {
-                let streak = 0;
-                for (let i = records.length - 1; i >= 0; i--) {
-                    if (records[i].numbers.includes(num)) break;
-                    streak++;
-                }
-                streaks[num] = streak;
+        // 6개 번호의 통계 하모니 점수(100점 만점). 등급 컷: 90 황금 / 70 우수 / 50 보통
+        function getHarmonyScore(nums) {
+            if (!nums || nums.length < 6) return 0;
+
+            let score = 0;
+
+            const sum = nums.reduce((a, b) => a + b, 0);
+            score += (sum >= 100 && sum <= 175) ? 20 : (((sum >= 90 && sum < 100) || (sum > 175 && sum <= 185)) ? 10 : 0);
+
+            const ac = getACValue(nums);
+            score += (ac >= 7 && ac <= 10) ? 20 : (ac === 6 ? 10 : 0);
+
+            const { odd, even } = getOddEvenRatio(nums);
+            const oddRatioStr = `${odd}:${even}`;
+            score += oddRatioStr === '3:3' ? 20 : (['2:4', '4:2'].includes(oddRatioStr) ? 15 : 0);
+
+            const { low, high } = getHighLowRatio(nums);
+            const hlRatioStr = `${low}:${high}`;
+            score += hlRatioStr === '3:3' ? 15 : (['2:4', '4:2'].includes(hlRatioStr) ? 10 : 0);
+
+            const primeCount = getPrimeCount(nums);
+            score += (primeCount >= 1 && primeCount <= 3) ? 15 : ((primeCount === 0 || primeCount === 4) ? 5 : 0);
+
+            const { g1, g2, g3 } = get3DivisionDistribution(nums);
+            score += (g1 <= 4 && g2 <= 4 && g3 <= 4) ? 10 : 0;
+
+            return score;
+        }
+
+        function getHarmonyGrade(score) {
+            if (score >= 90) return '황금 조화';
+            if (score >= 70) return '우수 조합';
+            if (score >= 50) return '보통 조합';
+            return '불균형 조합';
+        }
+
+        /* ===== 황금 조합 등장 연출 (연속 실패 구간) ===== */
+
+        // 두 핸들에서 연속 실패 횟수 구간 [min, max]를 읽어온다. (기본 0 ~ 17)
+        function getDramaRange() {
+            const read = (id, fallback) => {
+                const slider = document.getElementById(id);
+                const raw = slider ? parseInt(slider.value, 10) : fallback;
+                const value = Number.isInteger(raw) ? raw : fallback;
+                return Math.min(DRAMA_MAX, Math.max(DRAMA_MIN, value));
+            };
+            const a = read('drama-min', DRAMA_MIN);
+            const b = read('drama-max', DRAMA_MAX);
+            return { min: Math.min(a, b), max: Math.max(a, b) };
+        }
+
+        // 한쪽 핸들을 넘겨서 끌면 반대쪽 핸들을 밀어 구간이 뒤집히지 않게 한다.
+        function onDramaRangeChange(moved) {
+            const minEl = document.getElementById('drama-min');
+            const maxEl = document.getElementById('drama-max');
+            if (!minEl || !maxEl) return;
+
+            const minVal = parseInt(minEl.value, 10);
+            const maxVal = parseInt(maxEl.value, 10);
+            if (minVal > maxVal) {
+                if (moved === 'min') maxEl.value = minVal;
+                else minEl.value = maxVal;
             }
-            return streaks;
+
+            // 두 핸들이 겹쳐도 잡을 수 있도록 가까운 쪽을 위로 올린다.
+            const mid = (DRAMA_MIN + DRAMA_MAX) / 2;
+            minEl.style.zIndex = parseInt(minEl.value, 10) > mid ? '4' : '3';
+            maxEl.style.zIndex = parseInt(minEl.value, 10) > mid ? '3' : '4';
+
+            renderDramaPanel();
         }
 
-        // range 슬라이더에서 기준 회차(1 ~ 17, 기본 3)를 읽어온다.
-        function getOverdueThreshold() {
-            const slider = document.getElementById('overdue-threshold');
-            const raw = slider ? parseInt(slider.value, 10) : OVERDUE_DEFAULT;
-            const value = Number.isInteger(raw) ? raw : OVERDUE_DEFAULT;
-            return Math.min(OVERDUE_MAX, Math.max(OVERDUE_MIN, value));
-        }
+        function renderDramaPanel() {
+            const badge = document.getElementById('drama-range-badge');
+            const fill = document.getElementById('drama-range-fill');
+            const statusEl = document.getElementById('drama-status');
+            if (!badge || !fill || !statusEl) return;
 
-        // range 슬라이더에서 조합에 넣을 개수(1 ~ 3, 기본 3)를 읽어온다.
-        function getOverdueCount() {
-            const slider = document.getElementById('overdue-count');
-            const raw = slider ? parseInt(slider.value, 10) : OVERDUE_COUNT_DEFAULT;
-            const value = Number.isInteger(raw) ? raw : OVERDUE_COUNT_DEFAULT;
-            return Math.min(OVERDUE_COUNT_MAX, Math.max(OVERDUE_COUNT_MIN, value));
-        }
+            const { min, max } = getDramaRange();
+            const openEnded = max >= DRAMA_MAX;
+            badge.textContent = `${min} ~ ${max}회${openEnded ? ' 이상' : ''}`;
 
-        // 기준 회차 이상 연속 미출현한 번호 목록 (연속 실패가 긴 순서)
-        function getOverdueCandidates(threshold) {
-            if (historyStatus !== 'ready') return [];
-            const limit = threshold === undefined ? getOverdueThreshold() : threshold;
-            const candidates = [];
-            for (let num = 1; num <= 45; num++) {
-                if (missStreaks[num] >= limit) candidates.push({ number: num, streak: missStreaks[num] });
-            }
-            return candidates.sort((a, b) => b.streak - a.streak || a.number - b.number);
-        }
+            const span = DRAMA_MAX - DRAMA_MIN;
+            fill.style.left = `${((min - DRAMA_MIN) / span) * 100}%`;
+            fill.style.width = `${((max - min) / span) * 100}%`;
 
-        function renderOverduePanel() {
-            const badge = document.getElementById('overdue-threshold-badge');
-            const statusEl = document.getElementById('overdue-status');
-            const listEl = document.getElementById('overdue-candidates');
-            if (!badge || !statusEl || !listEl) return;
-
-            const threshold = getOverdueThreshold();
-            const count = getOverdueCount();
-            badge.textContent = `연속 ${threshold}회 이상`;
-
-            const countBadge = document.getElementById('overdue-count-badge');
-            if (countBadge) countBadge.textContent = `${count}개 포함`;
-
-            if (historyStatus === 'loading') {
-                statusEl.textContent = '역대 회차 데이터를 불러오는 중입니다...';
-                listEl.innerHTML = '';
+            const enabled = document.getElementById('filter-drama');
+            if (enabled && !enabled.checked) {
+                statusEl.textContent = '체크하면 지정한 횟수만큼 연속 실패한 뒤에 나온 조합만 추천합니다. (당첨 확률과 무관한 연출 기능)';
                 return;
             }
+            statusEl.textContent = min === 0 && openEnded
+                ? '실패 횟수를 가리지 않습니다. 우수 이상(70점) 조합이 처음 나오는 즉시 추천합니다.'
+                : `우수 이상(70점) 조합이 ${min}~${max}회${openEnded ? ' 이상' : ''} 연속 실패한 직후에 나올 때까지 시뮬레이션을 반복합니다.`;
+        }
 
-            if (historyStatus === 'failed') {
-                statusEl.textContent = '역대 회차 데이터를 불러오지 못해 연속 미출현 추천을 사용할 수 없습니다.';
-                listEl.innerHTML = '';
-                const checkbox = document.getElementById('filter-overdue');
-                if (checkbox) { checkbox.checked = false; checkbox.disabled = true; }
-                ['overdue-threshold', 'overdue-count'].forEach(id => {
-                    const slider = document.getElementById(id);
-                    if (slider) slider.disabled = true;
-                });
-                return;
+        function onDramaToggle() {
+            renderDramaPanel();
+            const enabled = document.getElementById('filter-drama');
+            if (!enabled || !enabled.checked) return;
+
+            const { min, max } = getDramaRange();
+            const openEnded = max >= DRAMA_MAX;
+            showNotification(`${min}~${max}회${openEnded ? ' 이상' : ''} 연속 실패한 뒤 나온 조합만 추천합니다.`);
+        }
+
+        // 활성화된 통계 필터를 모두 통과하는지 검사
+        function passesActiveFilters(combo, filters, prevNums) {
+            if (filters.sum) {
+                const sum = combo.reduce((a, b) => a + b, 0);
+                if (sum < 100 || sum > 175) return false;
             }
-
-            const candidates = getOverdueCandidates(threshold);
-            const latestRound = drawHistory.length ? drawHistory[drawHistory.length - 1].round : 0;
-            // 후보가 요청 개수보다 적으면 있는 만큼만 넣는다.
-            const effectiveCount = Math.min(count, candidates.length);
-            const countNote = effectiveCount < count
-                ? `후보가 ${candidates.length}개뿐이라 ${effectiveCount}개만 포함됩니다.`
-                : `생성 시 이 중 ${effectiveCount}개가 반드시 포함됩니다.`;
-            statusEl.textContent = candidates.length
-                ? `${latestRound}회차 기준 · ${threshold}회 이상 연속으로 빠진 번호 ${candidates.length}개 (최장 ${candidates[0].streak}회). ${countNote}`
-                : `${latestRound}회차 기준 · ${threshold}회 이상 연속 미출현한 번호가 없습니다. 기준 회차를 낮춰주세요.`;
-
-            listEl.innerHTML = '';
-            // 후보가 많을 때 패널이 지나치게 길어지지 않도록 연속 실패가 긴 순으로 일부만 노출
-            const visible = candidates.slice(0, OVERDUE_CHIP_LIMIT);
-            visible.forEach(c => {
-                const chip = document.createElement('button');
-                chip.type = 'button';
-                chip.className = 'overdue-chip';
-                chip.dataset.number = c.number;
-                chip.title = `${c.number}번은 최근 ${c.streak}회 연속으로 나오지 않았습니다. 클릭하면 선택판에 반영됩니다.`;
-                chip.onclick = () => toggleNumber(c.number);
-                chip.innerHTML = `${c.number}번<span class="chip-streak">${c.streak}회</span>`;
-                listEl.appendChild(chip);
-            });
-
-            if (candidates.length > visible.length) {
-                const more = document.createElement('span');
-                more.className = 'overdue-more';
-                more.textContent = `외 ${candidates.length - visible.length}개`;
-                more.title = '번호 하이라이트 필터의 "연속 미출현"을 누르면 전체 후보를 번호판에서 볼 수 있습니다.';
-                listEl.appendChild(more);
+            if (filters.ac) {
+                const ac = getACValue(combo);
+                if (ac < 7 || ac > 10) return false;
             }
-
-            markOverdueChips();
-        }
-
-        function markOverdueChips() {
-            const listEl = document.getElementById('overdue-candidates');
-            if (!listEl) return;
-            listEl.querySelectorAll('.overdue-chip').forEach(chip => {
-                const num = Number(chip.dataset.number);
-                chip.classList.toggle('picked', selectedNumbers.includes(num));
-            });
-        }
-
-        function onOverdueThresholdChange() {
-            renderOverduePanel();
-            if (currentGridFilter === 'overdue') setGridFilter('overdue');
-        }
-
-        function onOverdueCountChange() {
-            renderOverduePanel();
-        }
-
-        function onOverdueToggle() {
-            const checkbox = document.getElementById('filter-overdue');
-            if (!checkbox || !checkbox.checked) return;
-
-            const threshold = getOverdueThreshold();
-            const candidates = getOverdueCandidates(threshold);
-            if (!candidates.length) {
-                showNotification(`연속 ${threshold}회 이상 미출현한 번호가 없습니다. 기준 회차를 낮춰주세요.`);
-                return;
+            if (filters.oddeven) {
+                const { odd, even } = getOddEvenRatio(combo);
+                if (!['3:3', '2:4', '4:2'].includes(`${odd}:${even}`)) return false;
             }
-            const effectiveCount = Math.min(getOverdueCount(), candidates.length);
-            showNotification(`연속 ${threshold}회 이상 미출현 번호 ${candidates.length}개 중 ${effectiveCount}개를 조합에 넣습니다.`);
+            if (filters.highlow) {
+                const { low, high } = getHighLowRatio(combo);
+                if (!['3:3', '2:4', '4:2'].includes(`${low}:${high}`)) return false;
+            }
+            if (filters.prime) {
+                const primeCount = getPrimeCount(combo);
+                if (primeCount < 1 || primeCount > 3) return false;
+            }
+            if (filters.division) {
+                const { g1, g2, g3 } = get3DivisionDistribution(combo);
+                if (g1 > 4 || g2 > 4 || g3 > 4) return false;
+            }
+            if (filters.carry) {
+                const { carryOver, neighbors } = getPreviousDrawMatches(combo, prevNums);
+                const totalMatches = carryOver.length + neighbors.length;
+                if (totalMatches < 1 || totalMatches > 3) return false;
+            }
+            return true;
+        }
+
+        function drawRandomCombo() {
+            const combo = [];
+            while (combo.length < 6) {
+                const r = Math.floor(Math.random() * 45) + 1;
+                if (!combo.includes(r)) combo.push(r);
+            }
+            return combo.sort((a, b) => a - b);
         }
 
         // SMART COMBINATION GENERATOR (Monte-Carlo method)
         function generateCombination() {
             const prevNums = getPrevDrawNumbers();
-            
+
             const filters = {
                 sum: document.getElementById('filter-sum').checked,
                 ac: document.getElementById('filter-ac').checked,
@@ -2123,119 +2091,97 @@
                 highlow: document.getElementById('filter-highlow').checked,
                 prime: document.getElementById('filter-prime').checked,
                 division: document.getElementById('filter-division').checked,
-                carry: document.getElementById('filter-carry').checked,
-                overdue: document.getElementById('filter-overdue').checked
+                carry: document.getElementById('filter-carry').checked
             };
 
-            // 연속 미출현(연속 실패) 추천: 기준 회차 이상 빠진 번호를 설정한 개수만큼 시드로 먼저 확보한다.
-            const overdueThreshold = getOverdueThreshold();
-            let overdueCandidates = [];
-            let overdueCount = 0;
-            if (filters.overdue) {
-                overdueCandidates = getOverdueCandidates(overdueThreshold).map(c => c.number);
-                if (!overdueCandidates.length) {
-                    showNotification(`연속 ${overdueThreshold}회 이상 미출현한 번호가 없습니다. 기준 회차를 낮춰주세요.`);
-                    return;
-                }
-                overdueCount = Math.min(getOverdueCount(), overdueCandidates.length);
-            }
-            const overdueSet = new Set(overdueCandidates);
+            const dramaOn = document.getElementById('filter-drama').checked;
+            const { min: failMin, max: failMax } = getDramaRange();
+            const openEnded = failMax >= DRAMA_MAX;   // 상단 핸들이 17이면 상한 없음
 
-            let attempts = 0;
-            const maxAttempts = 15000;
+            const maxAttempts = dramaOn ? DRAMA_MAX_ATTEMPTS : 15000;
+            let attempts = 0;          // 총 시뮬레이션 횟수
+            let roundFails = 0;        // 이번 라운드에서 연속으로 실패한 횟수
             let found = false;
             let combo = [];
+            let acceptedFails = 0;
+            let fallback = null;       // 구간을 못 맞췄을 때 보여줄 마지막 통과 조합
 
             while (attempts < maxAttempts && !found) {
                 attempts++;
-                combo = [];
-                // 추천이 켜져 있으면 연속 미출현 번호를 설정 개수만큼 먼저 심고 나머지를 무작위로 채운다.
-                while (combo.length < overdueCount) {
-                    const pick = overdueCandidates[Math.floor(Math.random() * overdueCandidates.length)];
-                    if (!combo.includes(pick)) combo.push(pick);
-                }
-                // Pick 6 unique random numbers
-                while (combo.length < 6) {
-                    const r = Math.floor(Math.random() * 45) + 1;
-                    if (!combo.includes(r)) {
-                        combo.push(r);
-                    }
-                }
-                combo.sort((a, b) => a - b);
+                combo = drawRandomCombo();
 
-                // Check against active filters
-                let pass = true;
+                // 연출 모드에서는 필터 통과 + 우수 이상(70점)이어야 '성공'으로 친다.
+                const pass = passesActiveFilters(combo, filters, prevNums) &&
+                    (!dramaOn || getHarmonyScore(combo) >= HARMONY_GOOD_SCORE);
 
-                if (filters.sum) {
-                    const sum = combo.reduce((a, b) => a + b, 0);
-                    if (sum < 100 || sum > 175) pass = false;
-                }
-                if (pass && filters.ac) {
-                    const ac = getACValue(combo);
-                    if (ac < 7 || ac > 10) pass = false;
-                }
-                if (pass && filters.oddeven) {
-                    const { odd, even } = getOddEvenRatio(combo);
-                    const oddRatioStr = `${odd}:${even}`;
-                    if (oddRatioStr !== '3:3' && oddRatioStr !== '2:4' && oddRatioStr !== '4:2') pass = false;
-                }
-                if (pass && filters.highlow) {
-                    const { low, high } = getHighLowRatio(combo);
-                    const hlRatioStr = `${low}:${high}`;
-                    if (hlRatioStr !== '3:3' && hlRatioStr !== '2:4' && hlRatioStr !== '4:2') pass = false;
-                }
-                if (pass && filters.prime) {
-                    const primeCount = getPrimeCount(combo);
-                    if (primeCount < 1 || primeCount > 3) pass = false;
-                }
-                if (pass && filters.division) {
-                    const { g1, g2, g3 } = get3DivisionDistribution(combo);
-                    if (g1 > 4 || g2 > 4 || g3 > 4) pass = false;
-                }
-                if (pass && filters.carry) {
-                    const { carryOver, neighbors } = getPreviousDrawMatches(combo, prevNums);
-                    const totalMatches = carryOver.length + neighbors.length;
-                    if (totalMatches < 1 || totalMatches > 3) pass = false;
-                }
-                if (pass && filters.overdue) {
-                    if (combo.filter(n => overdueSet.has(n)).length < overdueCount) pass = false;
+                if (!pass) {
+                    roundFails++;
+                    // 이미 상한을 넘긴 라운드는 성공해도 버려지므로 바로 다음 라운드로 넘긴다.
+                    if (dramaOn && !openEnded && roundFails > failMax) roundFails = 0;
+                    continue;
                 }
 
-                if (pass) {
+                if (!dramaOn) {
                     found = true;
+                    break;
                 }
+
+                fallback = { combo: [...combo], fails: roundFails };
+                if (roundFails >= failMin && (openEnded || roundFails <= failMax)) {
+                    acceptedFails = roundFails;
+                    found = true;
+                    break;
+                }
+                roundFails = 0;   // 구간을 벗어난 성공 → 다음 라운드 시작
+            }
+
+            if (!found && dramaOn && fallback) {
+                // 구간을 못 맞춘 경우, 마지막으로 찾은 조합을 그대로 쓰되 사실대로 알린다.
+                combo = fallback.combo;
+                acceptedFails = fallback.fails;
+                generatedTempNumbers = [...combo];
+                lastGenSummary = buildGenSummary(attempts, acceptedFails, combo, true);
+                displayGeneratedResult(combo, attempts);
+                showNotification(`${failMin}~${failMax}회 구간을 ${attempts.toLocaleString()}회 시뮬레이션 안에 맞추지 못해 마지막 조합을 보여드립니다.`);
+                return;
             }
 
             if (found) {
                 generatedTempNumbers = [...combo];
-                lastOverduePicks = filters.overdue ? combo.filter(n => overdueSet.has(n)) : [];
+                lastGenSummary = buildGenSummary(attempts, acceptedFails, combo, false);
                 displayGeneratedResult(combo, attempts);
-                showNotification(`필터를 만족하는 번호를 ${attempts}회 시도 끝에 찾았습니다!`);
+                showNotification(dramaOn
+                    ? `${acceptedFails}회 연속 실패 끝에 ${acceptedFails + 1}번째 시도에서 ${getHarmonyGrade(getHarmonyScore(combo))} 조합이 나왔습니다!`
+                    : `필터를 만족하는 번호를 ${attempts}회 시도 끝에 찾았습니다!`);
             } else {
                 showNotification("조건을 만족하는 조합을 찾지 못했습니다. 필터를 줄이거나 조정해 주세요.");
             }
         }
 
+        // 생성 결과 하단에 보여줄 요약 문구
+        function buildGenSummary(attempts, fails, combo, missedRange) {
+            if (!document.getElementById('filter-drama').checked) {
+                return `시뮬레이션 시도 횟수: ${attempts.toLocaleString()}회`;
+            }
+            const score = getHarmonyScore(combo);
+            const head = `총 시뮬레이션 ${attempts.toLocaleString()}회 · ${fails}회 연속 실패 후 ${fails + 1}번째 시도에서 등장`;
+            const tail = ` · 하모니 ${score}점 (${getHarmonyGrade(score)})`;
+            return `${head}${tail}${missedRange ? ' · 지정 구간에는 도달하지 못했습니다' : ''}`;
+        }
+
         function displayGeneratedResult(combo, attempts) {
             const container = document.getElementById('generated-balls');
             container.innerHTML = '';
-
-            const overduePicks = new Set(lastOverduePicks);
-
+            
             combo.forEach(num => {
                 const ball = document.createElement('div');
-                ball.className = `ball ${getBallClass(num)}${overduePicks.has(num) ? ' overdue-pick' : ''}`;
+                ball.className = `ball ${getBallClass(num)}`;
                 ball.textContent = num;
-                if (overduePicks.has(num)) ball.title = `${num}번: 최근 ${missStreaks[num]}회 연속 미출현`;
                 container.appendChild(ball);
             });
 
-            let meta = `시뮬레이션 시도 횟수: ${attempts}회`;
-            if (lastOverduePicks.length) {
-                const detail = lastOverduePicks.map(n => `${n}번(${missStreaks[n]}회)`).join(', ');
-                meta += ` · 연속 미출현 포함: ${detail}`;
-            }
-            document.getElementById('gen-meta-text').textContent = meta;
+            document.getElementById('gen-meta-text').textContent =
+                lastGenSummary || `시뮬레이션 시도 횟수: ${attempts.toLocaleString()}회`;
             document.getElementById('generated-result-wrap').style.display = 'block';
         }
 
@@ -2270,12 +2216,8 @@
         window.onload = () => {
             initBoard();
             applyNumbersFromUrl();
-            renderOverduePanel();
-            loadDrawHistory().catch(err => {
-                console.log("역대 회차 로드 실패. 기본값을 사용합니다:", err.message);
-                historyStatus = 'failed';
-                renderOverduePanel();
-            });
+            onDramaRangeChange('init');
+            loadLatestDrawNumbers();
         };
 
         // CSV 파서 추가
@@ -2302,64 +2244,62 @@
             return data;
         }
 
-        // DB/CSV 원본 행을 { round, numbers } 형태로 정규화하고 회차 오름차순 정렬
-        function normalizeDrawRows(rows, source) {
-            return rows
-                .map(row => ({
-                    round: Number(source === 'db' ? row.round : row['회차']),
-                    numbers: [1, 2, 3, 4, 5, 6].map(i => Number(source === 'db' ? row[`num${i}`] : row[`번호${i}`]))
-                }))
-                .filter(r => Number.isInteger(r.round) && r.numbers.every(n => Number.isInteger(n) && n >= 1 && n <= 45))
-                .sort((a, b) => a.round - b.round);
-        }
-
-        // Supabase는 한 번의 요청에 최대 1000행만 반환하므로 Range 헤더로 나눠 받는다.
-        async function fetchAllSupabaseRows(selectQuery) {
-            const pageSize = 1000;
-            let all = [];
-            let from = 0;
-            while (true) {
-                const res = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/lotto_history?${selectQuery}`, {
+        // DB 또는 CSV로부터 최신 번호를 가져와 입력창 자동 설정
+        function loadLatestDrawNumbers() {
+            if (typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+                console.log("Supabase에서 최신 당첨 번호를 조회하여 직전 회차로 설정합니다...");
+                fetch(`${SUPABASE_CONFIG.url}/rest/v1/lotto_history?select=*&order=round.desc&limit=1`, {
                     headers: {
                         'apikey': SUPABASE_CONFIG.anonKey,
-                        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
-                        'Range': `${from}-${from + pageSize - 1}`
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
                     }
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error("DB API 응답 오류");
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const latest = data[0];
+                        setPrevDrawInputs(latest.round, [latest.num1, latest.num2, latest.num3, latest.num4, latest.num5, latest.num6]);
+                    } else {
+                        throw new Error("데이터가 비어 있음");
+                    }
+                })
+                .catch(err => {
+                    console.warn("최신 번호 DB 로드 실패, CSV 폴백 시도:", err.message);
+                    loadLatestDrawFromCsv();
                 });
-                if (!res.ok) throw new Error("DB API 응답 오류");
-                const page = await res.json();
-                all = all.concat(page);
-                if (page.length < pageSize) break;
-                from += pageSize;
+            } else {
+                loadLatestDrawFromCsv();
             }
-            return all;
         }
 
-        // DB 또는 CSV로부터 역대 회차를 모두 가져와 직전 회차 입력값과 연속 미출현 통계를 세팅
-        async function loadDrawHistory() {
-            try {
-                if (typeof SUPABASE_CONFIG === 'undefined' || !SUPABASE_CONFIG.url || !SUPABASE_CONFIG.anonKey) {
-                    throw new Error("Supabase 설정 없음");
-                }
-                console.log("Supabase에서 역대 당첨 번호를 조회합니다...");
-                const rows = await fetchAllSupabaseRows('select=round,num1,num2,num3,num4,num5,num6&order=round.asc');
-                drawHistory = normalizeDrawRows(rows, 'db');
-                if (!drawHistory.length) throw new Error("데이터가 비어 있음");
-            } catch (err) {
-                console.warn("역대 번호 DB 로드 실패, CSV 폴백 시도:", err.message);
-                const res = await fetch('lotto_history.csv');
-                if (!res.ok) throw new Error("CSV 로드 실패");
-                drawHistory = normalizeDrawRows(parseCSV(await res.text()), 'csv');
-                if (!drawHistory.length) throw new Error("CSV 데이터가 비어 있음");
-            }
-
-            missStreaks = computeMissStreaks(drawHistory);
-            historyStatus = 'ready';
-
-            const latest = drawHistory[drawHistory.length - 1];
-            setPrevDrawInputs(latest.round, latest.numbers);
-            renderOverduePanel();
-            if (currentGridFilter === 'overdue') setGridFilter('overdue');
+        function loadLatestDrawFromCsv() {
+            fetch('lotto_history.csv')
+                .then(res => {
+                    if (!res.ok) throw new Error("CSV load failed");
+                    return res.text();
+                })
+                .then(text => {
+                    const records = parseCSV(text);
+                    if (records && records.length > 0) {
+                        records.sort((a, b) => parseInt(b['회차']) - parseInt(a['회차']));
+                        const latest = records[0];
+                        const nums = [
+                            parseInt(latest['번호1']),
+                            parseInt(latest['번호2']),
+                            parseInt(latest['번호3']),
+                            parseInt(latest['번호4']),
+                            parseInt(latest['번호5']),
+                            parseInt(latest['번호6'])
+                        ];
+                        setPrevDrawInputs(parseInt(latest['회차']), nums);
+                    }
+                })
+                .catch(err => {
+                    console.log("로컬 CSV 로드 실패. 기본값을 사용합니다:", err.message);
+                });
         }
 
         function setPrevDrawInputs(round, nums) {
