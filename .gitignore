@@ -6,6 +6,9 @@ Thumbs.db
 node_modules/
 www/
 
+# Cloudflare Wrangler local cache and configuration
+.wrangler/
+
 # 릴리즈 서명 (절대 커밋 금지 — 별도 안전한 외부 저장소 에 백업본 유지)
 android/release.keystore
 android/keystore.properties
